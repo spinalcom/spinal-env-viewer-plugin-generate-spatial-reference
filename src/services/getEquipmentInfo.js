@@ -33,7 +33,7 @@ export async function getEquipmentInfo(manager, intersects) {
         bimObject,
         model: bimObjectModel,
         floor_finish: null,
-        roomId: null,
+        roomId: null
       });
       continue;
     }
@@ -45,8 +45,8 @@ export async function getEquipmentInfo(manager, intersects) {
       bimObject,
       model: bimObjectModel,
       floor_finish,
-      roomId,
+      roomId
     });
   }
-  return equipmentInfo
+  return equipmentInfo;
 }

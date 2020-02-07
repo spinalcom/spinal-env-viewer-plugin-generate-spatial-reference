@@ -30,27 +30,26 @@ with this file. If not, see
               justify-center>
       <v-dialog v-model="dialog">
         <v-card :dark="true">
-          <v-card-title class="headline">Choisez un model
+          <v-card-title class="headline">
+            Choisez un model
           </v-card-title>
           <v-card-text>
-
             <v-progress-circular v-if="spin"
                                  indeterminate
-                                 color="primary"></v-progress-circular>
+                                 color="primary" />
             <v-select :items="bimfiles"
                       label="Model"
-                      @change="onModelSelected"></v-select>
+                      @change="onModelSelected" />
             <v-text-field v-model="buildingName"
                           placeholder="Nom du batiment"
-                          label="Nom du batiement">
-            </v-text-field>
+                          label="Nom du batiement" />
 
             <v-checkbox v-model="addLevel"
-                        :label="`Ajouter un etage`"></v-checkbox>
+                        :label="`Ajouter un etage`" />
             <!-- <comboxSelectAttr></comboxSelectAttr> -->
           </v-card-text>
           <v-card-actions>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-btn color="green darken-1"
                    flat
                    :disabled="selectedModel === null"
@@ -72,9 +71,6 @@ import * as SM from "spinal-spatial-referential";
 
 export default {
   name: "DialogGenerateContext",
-  components: {
-    // comboxSelectAttr
-  },
   data: function() {
     this.manager = new SM.default.SpatialManager();
     return {
@@ -116,11 +112,10 @@ export default {
 
       let bimFile;
       for (let i = 0; i < this.models.length; i++) {
-        if (this.models[i].info.name.get() === this.selectedModel)
+        if (this.models[i].info.name.get() === this.selectedModel) {
           bimFile = this.models[i];
+        }
       }
-      let manager;
-      let model;
       window.spinal.SpinalForgeViewer.getSVF(
         bimFile.element,
         bimFile.info.id.get(),
@@ -140,21 +135,20 @@ export default {
           );
 
           await this.manager.init();
-
-          model = m;
           this.model = m;
-          return await this.manager.getBuilding(this.buildingName);
+          return this.manager.getBuilding(this.buildingName);
         })
-        .then(async building => {
-          if (this.addLevel)
+        .then(building => {
+          if (this.addLevel) {
             return this.manager.generateContext(this.buildingName, this.model);
-          else {
-            if (typeof building !== "undefined")
+          } else {
+            if (typeof building !== "undefined") {
               return this.manager.updateContext(this.buildingName, this.model);
+            }
             return this.manager.generateContext(this.buildingName, this.model);
           }
         })
-        .then(res => {
+        .then(() => {
           this.spin = false;
         });
     },
@@ -167,17 +161,17 @@ export default {
 
         const viewer = window.spinal.SpinalForgeViewer.viewerManager.viewer;
         viewer.addEventListener(
-          Autodesk.Viewing.GEOMETRY_LOADED_EVENT,
+          window.Autodesk.Viewing.GEOMETRY_LOADED_EVENT,
           geometryLoaded
         );
         viewer.loadModel(path, opts);
       });
     },
-    opened(option) {
+    opened() {
       this.dialog = true;
     },
     removed() {},
-    closeDialog(closeResult) {}
+    closeDialog() {}
   }
 };
 </script>

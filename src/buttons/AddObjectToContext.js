@@ -23,26 +23,26 @@
  */
 import { SpinalContextApp } from 'spinal-env-viewer-context-menu-service';
 
-const { spinalPanelManagerService } = require( "spinal-env-viewer-panel-manager-service" );
+const { spinalPanelManagerService } = require("spinal-env-viewer-panel-manager-service");
 
 export class ButtonAddObjectToCategory extends SpinalContextApp {
-  
+
   constructor() {
-    super( 'Ajouter des objets', 'Ajouter des objet au context spatial', {
+    super('Ajouter des objets', 'Ajouter des objet au context spatial', {
       icon: 'add',
       icon_type: 'in',
       backgroundColor: '#000000',
       fontColor: '#ffffff'
-    } );
-    
-    this.action = this.openPanel.bind( this );
+    });
+
+    this.action = this.openPanel.bind(this);
   }
-  
+
   isShown() {
-    return Promise.resolve( true );
+    return Promise.resolve(true);
   }
-  
+
   openPanel() {
-    spinalPanelManagerService.openPanel( "DialogAddObject" );
+    spinalPanelManagerService.openPanel("DialogAddObject");
   }
 }

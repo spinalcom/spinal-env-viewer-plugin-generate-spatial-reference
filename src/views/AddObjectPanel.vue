@@ -27,24 +27,26 @@ with this file. If not, see
          class="geolocate-bimObj-body">
     <v-progress-circular v-if="spin"
                          indeterminate
-                         color="primary"></v-progress-circular>
-    <div class="geolocate-bimObj-container"
-         v-else>
+                         color="primary" />
+    <div v-else
+         class="geolocate-bimObj-container">
       <v-flex xs12>
-        <v-select :items="models"
-                  v-model="arcModel"
+        <v-select v-model="arcModel"
+                  :items="models"
                   item-text="name"
                   label="Models contenant l'architecture"
-                  multiple></v-select>
-
+                  multiple />
       </v-flex>
-      <table-component :bimSelected="bimSelected"></table-component>
+      <table-component :bim-selected="bimSelected" />
       <div class="geolocate-bimObj-footer">
-        <v-btn @click="addCategory"
-               dark>Ajouter Selection</v-btn>
-        <v-btn @click="addObjectToContext"
-               dark
-               :disabled="this.bimSelected.length == 0">Placer
+        <v-btn dark
+               @click="addCategory">
+          Ajouter Selection
+        </v-btn>
+        <v-btn dark
+               :disabled="bimSelected.length == 0"
+               @click="addObjectToContext">
+          Placer
         </v-btn>
       </div>
     </div>
@@ -52,7 +54,6 @@ with this file. If not, see
 </template>
 
 <script>
-import { bimObjectManagerService } from "spinal-env-viewer-bim-manager-service";
 import TableComponent from "./tableComponent.vue";
 import * as SM from "spinal-spatial-referential";
 // import { cast } from "../services/RayCaster";
@@ -99,11 +100,12 @@ export default {
           referentialCopy.push(select);
         }
       }
-      this.bimSelected = [];
-      for (let i = 0; i < referentialCopy.length; i++) {
-        this.bimSelected.push(referentialCopy[i]);
-      }
+      // this.bimSelected = [];
+      // for (let i = 0; i < referentialCopy.length; i++) {
+      //   this.bimSelected.push(referentialCopy[i]);
+      // }
       this.bimSelected = referentialCopy;
+      console.log("this.bimSelected", this.bimSelected);
     },
     async addObjectToContext() {
       this.spin = true;
@@ -114,25 +116,23 @@ export default {
           this.bimSelected,
           this.arcModel
         );
-
         console.log("intersects res => ", intersects);
-
         const equipmentInfo = await getEquipmentInfo(
           this.manager,
           intersects,
           this.bimSelected
         );
         console.log("equipmentInfo res => ", equipmentInfo);
-
         await addEquipmentInContext(this.manager, equipmentInfo);
       } catch (e) {
+        console.error(e);
         throw e;
       } finally {
         this.spin = false;
       }
     },
 
-    opened(option) {
+    opened() {
       this.dialog = true;
       window.isolate = isolateFinishFloor.bind(
         this,
@@ -141,16 +141,19 @@ export default {
         this.models
       ); // testing
 
-      for (let key in spinal.BimObjectService.mappingNameByModel) {
-        if (spinal.BimObjectService.mappingNameByModel.hasOwnProperty(key))
+      for (let key in window.spinal.BimObjectService.mappingNameByModel) {
+        if (
+          window.spinal.BimObjectService.mappingNameByModel.hasOwnProperty(key)
+        ) {
           this.models.push({
             name: key,
-            model: spinal.BimObjectService.mappingNameByModel[key]
+            model: window.spinal.BimObjectService.mappingNameByModel[key]
           });
+        }
       }
     },
     removed() {},
-    closeDialog(closeResult) {}
+    closeDialog() {}
   }
 };
 </script>

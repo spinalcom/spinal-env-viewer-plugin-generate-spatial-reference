@@ -53,7 +53,9 @@ with this file. If not, see
           {{ item.text }}
         </span>
         <v-icon small
-                @click="parent.selectItem(item)">close</v-icon>
+                @click="parent.selectItem(item)">
+          close
+        </v-icon>
       </v-chip>
     </template>
     <template v-slot:item="{ index, item }">
@@ -65,7 +67,7 @@ with this file. If not, see
                       background-color="transparent"
                       hide-details
                       solo
-                      @keyup.enter="edit(index, item)"></v-text-field>
+                      @keyup.enter="edit(index, item)" />
         <v-chip v-else
                 :color="`${item.color} lighten-3`"
                 dark
@@ -74,7 +76,7 @@ with this file. If not, see
           {{ item.text }}
         </v-chip>
       </v-list-tile-content>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <v-list-tile-action @click.stop>
         <v-btn icon
                @click.stop.prevent="edit(index, item)">
@@ -86,7 +88,7 @@ with this file. If not, see
 </template>
 <script>
 export default {
-  name: "comboxSelectAttr",
+  name: "ComboxSelectAttr",
   data: () => ({
     activator: null,
     attach: null,

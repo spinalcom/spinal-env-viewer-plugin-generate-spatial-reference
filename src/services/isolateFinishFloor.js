@@ -28,9 +28,12 @@ export async function isolateFinishFloor(manager, viewer, models) {
 
   for (let i = 0; i < models.length; i++) {
     const model = models[i].model;
+    // eslint-disable-next-line no-await-in-loop
     const tmpFloor = await manager.getFloorFinishId(model);
-    if (tmpFloor.length === 0) viewer.hide(1, model)
-    else
+    if (tmpFloor.length === 0) {
+      viewer.hide(1, model);
+    } else {
       viewer.isolate(tmpFloor, model);
+    }
   }
 }

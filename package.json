@@ -16,6 +16,7 @@
     "spinal-env-viewer-panel-manager-service": "git+https://github.com/spinalcom/spinal-env-viewer-panel-manager-service.git",
     "spinal-env-viewer-panel-manager-service_spinalforgeextention": "git+https://github.com/spinalcom/spinal-env-viewer-panel-manager-service_spinalforgeextention.git",
     "spinal-spatial-referential": "git+https://github.com/spinalcom/spinal-spatial-referential-service.git",
+    "vue-virtual-scroller": "^1.0.0-rc.2",
     "vuetify": "^1.5.16"
   },
   "browserify": {

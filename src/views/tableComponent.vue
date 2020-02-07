@@ -23,47 +23,73 @@ with this file. If not, see
 -->
 
 <template>
-
-  <md-table class="_tableComponent md-scrollbar">
-    <md-table-row>
-      <md-table-head md-numeric>dbId</md-table-head>
-      <md-table-head>Name</md-table-head>
-      <md-table-head></md-table-head>
-      <md-table-head></md-table-head>
-    </md-table-row>
-
-    <md-table-row v-for="(bim,index) in data"
-                  :key="index">
-      <md-table-cell md-numeric>{{bim.dbId}}</md-table-cell>
-      <md-table-cell>{{bim.name}}</md-table-cell>
-
-      <md-table-cell>
-        <md-button class="md-icon-button md-dense"
-                   @click="seeItem(bim.dbId)">
-          <md-icon>visibility</md-icon>
-        </md-button>
-      </md-table-cell>
-
-      <md-table-cell>
-        <md-button class="md-icon-button md-dense"
-                   @click="deleteItem(bim.dbId)">
-          <md-icon>clear</md-icon>
-        </md-button>
-      </md-table-cell>
-    </md-table-row>
-
-  </md-table>
-
+  <div class="spinal-list-model-container">
+    <v-list class="_tableComponent spinal-list-scrollbar">
+      <v-list-tile v-for="item in pageData"
+                   :key="item.id"
+                   class="dbid-list-item">
+        <v-list-tile-content>
+          <v-list-tile-title>{{ item.name }}</v-list-tile-title>
+          <v-list-tile-sub-title>{{ item.dbId }}</v-list-tile-sub-title>
+        </v-list-tile-content>
+        <v-list-tile-action class="dbid-list-item-action-btn">
+          <v-btn icon
+                 ripple
+                 @click="seeItem(item.dbId)">
+            <v-icon color="grey lighten-1">
+              visibility
+            </v-icon>
+          </v-btn>
+          <v-btn icon
+                 ripple
+                 @click="deleteItem(item.dbId)">
+            <v-icon color="grey lighten-1">
+              clear
+            </v-icon>
+          </v-btn>
+        </v-list-tile-action>
+      </v-list-tile>
+    </v-list>
+    <v-pagination v-model="page"
+                  :length="totalPage" />
+  </div>
 </template>
 
 <script>
 export default {
-  name: "tableComponent",
-  props: ["bimSelected"],
+  name: "TableComponent",
+  components: {},
+  props: {
+    bimSelected: {
+      type: Array,
+      required: true,
+      validator: function() {
+        return [];
+      }
+    }
+  },
   data() {
-    return {
-      data: []
-    };
+    return { data: [], page: 1, nbPerPage: 10 };
+  },
+  computed: {
+    pageData() {
+      const idx = (this.page - 1) * this.nbPerPage;
+      return this.data.slice(idx, idx + this.nbPerPage);
+    },
+    totalPage() {
+      return Math.ceil(this.data.length / this.nbPerPage);
+    }
+  },
+  watch: {
+    bimSelected() {
+      if (this.bimSelected) {
+        let values = this.getObjectsSelectedInfo();
+        Promise.all(values).then(dbIds => {
+          dbIds = dbIds.flat();
+          this.data = dbIds;
+        });
+      }
+    }
   },
   methods: {
     getObjectsSelectedInfo() {
@@ -72,10 +98,9 @@ export default {
         return new Promise(resolve => {
           model.getBulkProperties(
             selection,
-            {
-              propFilter: ["name"]
-            },
+            { propFilter: ["name"] },
             dbIds => {
+              dbIds.forEach(e => (e.id = `${model.id}-${e.dbId}`));
               return resolve(dbIds);
             }
           );
@@ -99,21 +124,7 @@ export default {
         let index = this.bimSelected[i].selection.indexOf(dbId);
         if (index !== -1) {
           this.bimSelected[i].selection.splice(index, 1);
-          console.log(this.bimSelected);
         }
-      }
-    }
-  },
-  watch: {
-    bimSelected() {
-      console.log(this.bimSelected);
-      console.log("update");
-      if (this.bimSelected) {
-        let values = this.getObjectsSelectedInfo();
-        Promise.all(values).then(dbIds => {
-          dbIds = dbIds.flat();
-          this.data = dbIds;
-        });
       }
     }
   }
@@ -121,10 +132,41 @@ export default {
 </script>
 
 <style scoped>
-._tableComponent {
-  width: 100%;
+.spinal-list-model-container {
   height: calc(100% - 117px);
+  position: relative;
+}
+._tableComponent {
+  height: calc(100% - 42px);
+  width: 100%;
   overflow: auto;
   background-color: transparent;
+}
+
+.spinal-list-scrollbar::-webkit-scrollbar {
+  overflow-x: auto;
+  width: 5px;
+  height: 5px;
+}
+.spinal-list-scrollbar::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  background: rgba(169, 169, 169, 0.9);
+}
+.spinal-list-scrollbar::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.3);
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+</style>
+
+<style>
+.spinal-list-item {
+  height: 100%;
+}
+
+.dbid-list-item-action-btn {
+  flex-direction: row;
 }
 </style>

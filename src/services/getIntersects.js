@@ -76,16 +76,16 @@ async function castToFloorFinish(id, model, arcMod, manager) {
   return { id, model, intersect };
 }
 
-function isFloorFinish(arcModels, intersect) {
-  for (const model of arcModels) {
-    if (model === intersect.model) {
-      return model.dbId.includes(intersect.dbId);
-    }
-  }
-  return false;
-}
+// function isFloorFinish(arcModels, intersect) {
+//   for (const model of arcModels) {
+//     if (model === intersect.model) {
+//       return model.dbId.includes(intersect.dbId);
+//     }
+//   }
+//   return false;
+// }
 async function getModelByName(manager, name) {
-  const model = spinal.BimObjectService.mappingNameByModel[name];
+  const model = window.spinal.BimObjectService.mappingNameByModel[name];
   return {
     model,
     dbId: await manager.getFloorFinishId(model)
