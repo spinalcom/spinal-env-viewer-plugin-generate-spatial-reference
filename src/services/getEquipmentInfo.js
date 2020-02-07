@@ -22,6 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
+/* eslint-disable no-await-in-loop */
 export async function getEquipmentInfo(manager, intersects) {
   let equipmentInfo = [];
   for (const spinalIntersection of intersects) {
@@ -39,6 +40,7 @@ export async function getEquipmentInfo(manager, intersects) {
     }
     let floor_finish = spinalIntersection.intersect.dbId;
     let floor_finishModel = spinalIntersection.intersect.model;
+    // eslint-disable-next-line require-atomic-updates
     manager.modelArchi = await manager.getArchiModel(floor_finishModel);
     let roomId = await manager.getRoomIdFromFloorFinish(floor_finish);
     equipmentInfo.push({
