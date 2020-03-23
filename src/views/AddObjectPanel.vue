@@ -34,10 +34,13 @@ with this file. If not, see
         <v-select v-model="arcModel"
                   :items="models"
                   item-text="name"
+                  attach=".geolocate-bimObj-body"
                   label="Models contenant l'architecture"
                   multiple />
       </v-flex>
-      <table-component :bim-selected="bimSelected" />
+      <table-component :bim-selected="computBimSelected"
+                       @seeItem="seeItem"
+                       @deleteItem="deleteItem" />
       <div class="geolocate-bimObj-footer">
         <v-btn dark
                @click="addCategory">
@@ -73,7 +76,8 @@ export default {
       intersects: [],
       spin: false,
       models: [],
-      arcModel: []
+      arcModel: [],
+      computBimSelected: []
       //contain the externalId of the categories and their names
     };
   },
@@ -84,33 +88,28 @@ export default {
   methods: {
     addCategory() {
       const aggregateSelection = this.viewer.getAggregateSelection();
-      const referentialCopy = Object.assign([], this.bimSelected);
+      // const referentialCopy = Object.assign([], this.bimSelected);
       for (let select of aggregateSelection) {
-        let found = referentialCopy.find(el => {
+        let found = this.bimSelected.find(el => {
           return el.model.id === select.model.id;
         });
 
         if (typeof found !== "undefined") {
-          for (let i = 0; i < select.selection.length; i++) {
-            if (found.selection.indexOf(select.selection[i]) === -1) {
-              found.selection.push(...select.selection[i]);
+          for (const dbId of select.selection) {
+            if (!found.selection.includes(dbId)) {
+              found.selection.push(dbId);
             }
           }
         } else {
-          referentialCopy.push(select);
+          this.bimSelected.push(select);
         }
       }
-      // this.bimSelected = [];
-      // for (let i = 0; i < referentialCopy.length; i++) {
-      //   this.bimSelected.push(referentialCopy[i]);
-      // }
-      this.bimSelected = referentialCopy;
-      console.log("this.bimSelected", this.bimSelected);
+      this.getObjectsSelectedInfo();
     },
     async addObjectToContext() {
       this.spin = true;
       try {
-        await isolateFinishFloor(this.manager, this.viewer, this.models);
+        // await isolateFinishFloor(this.manager, this.viewer, this.models);
         const intersects = await getIntersects(
           this.manager,
           this.bimSelected,
@@ -131,7 +130,59 @@ export default {
         this.spin = false;
       }
     },
+    async getObjectsSelectedInfo() {
+      const res = [];
+      for (const { model, selection } of this.bimSelected) {
+        if (selection.length === 0) continue;
+        res.push(
+          new Promise(resolve => {
+            model.getBulkProperties(
+              Array.from(selection),
+              { propFilter: ["name"] },
+              result => {
+                result.forEach(e => {
+                  e.id = `${model.id}-${e.dbId}`;
+                  e.modelId = model.id;
+                });
+                resolve(result);
+              }
+            );
+          })
+        );
+      }
+      const tmpRes = await Promise.all(res);
+      let idx = 0;
+      while (idx < this.bimSelected.length) {
+        const obj = this.bimSelected[idx];
+        if (obj.selection.length === 0) {
+          this.bimSelected.splice(idx, 1);
+        } else {
+          idx++;
+        }
+      }
 
+      this.computBimSelected = tmpRes.reduce((acc, el) => {
+        acc.push(...el);
+        return acc;
+      }, []);
+    },
+    deleteItem(item) {
+      for (const { model, selection } of this.bimSelected) {
+        if (model.id === item.modelId) {
+          const idx = selection.indexOf(item.dbId);
+          if (idx !== -1) selection.splice(idx, 1);
+          this.getObjectsSelectedInfo();
+          return;
+        }
+      }
+    },
+    seeItem(item) {
+      for (const { model } of this.bimSelected) {
+        if (model.id === item.modelId) {
+          return window.spinal.ForgeViewer.viewer.select([item.dbId], model);
+        }
+      }
+    },
     opened() {
       this.dialog = true;
       window.isolate = isolateFinishFloor.bind(
@@ -153,6 +204,7 @@ export default {
       }
     },
     removed() {},
+    close() {},
     closeDialog() {}
   }
 };
@@ -181,7 +233,7 @@ export default {
   height: 100%;
 }
 
-.geolocate-bimObj-body > .v-menu__content {
+/* .geolocate-bimObj-body > .v-menu__content {
   top: 52px !important;
-}
+} */
 </style>

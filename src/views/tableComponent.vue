@@ -35,14 +35,14 @@ with this file. If not, see
         <v-list-tile-action class="dbid-list-item-action-btn">
           <v-btn icon
                  ripple
-                 @click="seeItem(item.dbId)">
+                 @click="seeItem(item)">
             <v-icon color="grey lighten-1">
               visibility
             </v-icon>
           </v-btn>
           <v-btn icon
                  ripple
-                 @click="deleteItem(item.dbId)">
+                 @click="deleteItem(item)">
             <v-icon color="grey lighten-1">
               clear
             </v-icon>
@@ -74,58 +74,18 @@ export default {
   computed: {
     pageData() {
       const idx = (this.page - 1) * this.nbPerPage;
-      return this.data.slice(idx, idx + this.nbPerPage);
+      return this.bimSelected.slice(idx, idx + this.nbPerPage);
     },
     totalPage() {
-      return Math.ceil(this.data.length / this.nbPerPage);
-    }
-  },
-  watch: {
-    bimSelected() {
-      if (this.bimSelected) {
-        let values = this.getObjectsSelectedInfo();
-        Promise.all(values).then(dbIds => {
-          dbIds = dbIds.flat();
-          this.data = dbIds;
-        });
-      }
+      return Math.ceil(this.bimSelected.length / this.nbPerPage);
     }
   },
   methods: {
-    getObjectsSelectedInfo() {
-      return this.bimSelected.map(el => {
-        const { model, selection } = el;
-        return new Promise(resolve => {
-          model.getBulkProperties(
-            selection,
-            { propFilter: ["name"] },
-            dbIds => {
-              dbIds.forEach(e => (e.id = `${model.id}-${e.dbId}`));
-              return resolve(dbIds);
-            }
-          );
-        });
-      });
+    seeItem(item) {
+      this.$emit("seeItem", item);
     },
-    seeItem(dbId) {
-      let bimIds = this.bimSelected.filter(el => {
-        return el.selection.indexOf(dbId) !== -1;
-      });
-      bimIds.forEach(element => {
-        window.spinal.ForgeViewer.viewer.impl.selector.setSelection(
-          [dbId],
-          element.model
-        );
-      });
-    },
-    deleteItem(dbId) {
-      this.data = this.data.filter(el => el.dbId !== dbId);
-      for (let i = 0; i < this.bimSelected.length; i++) {
-        let index = this.bimSelected[i].selection.indexOf(dbId);
-        if (index !== -1) {
-          this.bimSelected[i].selection.splice(index, 1);
-        }
-      }
+    deleteItem(item) {
+      this.$emit("deleteItem", item);
     }
   }
 };

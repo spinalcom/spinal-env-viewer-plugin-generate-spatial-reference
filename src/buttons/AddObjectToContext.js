@@ -21,6 +21,7 @@
  *  with this file. If not, see
  *  <http://resources.spinalcom.com/licenses.pdf>.
  */
+
 import { SpinalContextApp } from 'spinal-env-viewer-context-menu-service';
 
 const { spinalPanelManagerService } = require("spinal-env-viewer-panel-manager-service");

@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { SpinalMountExtention } from "spinal-env-viewer-panel-manager-service";
+// import { SpinalMountExtention } from "spinal-env-viewer-panel-manager-service";
 import { spinalContextMenuService } from "spinal-env-viewer-context-menu-service";
 import Vue from 'vue';
 import Vuetify from 'vuetify';
@@ -41,15 +41,33 @@ spinalContextMenuService.registerApp(TOP_BAR_HOOK_NAME, new ButtonGenerateContex
 spinalContextMenuService.registerApp(TOP_BAR_HOOK_NAME, new ButtonAddObjectToCategory(), [7]);
 
 
-SpinalMountExtention.mount({
-  // name registered.
+// SpinalMountExtention.mount({
+//   // name registered.
+//   name: "DialogGenerateContext",
+//   // Vue.extend to create a Compoment constructor
+//   vueMountComponent: Vue.extend(DialogGenerateContext),
+//   // where to  append the Compoment
+//   parentContainer: document.body
+// });
+
+SpinalForgeExtention.registerExtention('DialogGenerateContext', SpinalForgeExtention.createExtention({
   name: "DialogGenerateContext",
   // Vue.extend to create a Compoment constructor
   vueMountComponent: Vue.extend(DialogGenerateContext),
   // where to  append the Compoment
-  parentContainer: document.body
-});
+  parentContainer: document.body,
 
+  panel: {
+    title: "Generation / Mise à jour du context Spatial",
+    classname: "spinal-pannel",
+    closeBehaviour: "delete"
+  },
+  style: {
+    left: "405px",
+    width: "700px",
+    height: '250px'
+  }
+}));
 
 
 SpinalForgeExtention.registerExtention('DialogAddObject', SpinalForgeExtention.createExtention({
