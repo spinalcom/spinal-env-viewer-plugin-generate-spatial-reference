@@ -43,7 +43,7 @@ with this file. If not, see
           <AdvencedSelectModel v-if="active === 1"
                                :bimfiles="bimfiles"
                                :btn-disabled="spin"
-                               @continue="generate" />
+                               @onGenerate="advancedGenerate" />
         </v-tab-item>
       </v-tabs>
 
@@ -121,6 +121,12 @@ export default {
       } finally {
         this.spin = false;
       }
+    },
+    async advancedGenerate(cfg) {
+      console.log("cfg", cfg);
+      const spatialConfig = await this.manager.getSpatialConfig();
+      spatialConfig.set(cfg);
+      await this.generate(cfg.basic);
     },
     opened() {
       this.dialog = true;

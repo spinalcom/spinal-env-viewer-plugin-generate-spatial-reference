@@ -64,7 +64,7 @@ with this file. If not, see
           <small>facultatif</small>
         </v-stepper-step>
         <v-stepper-content step="4">
-          <AdvenceSettings revit-cat="Revit Sol"
+          <AdvenceSettings revit-cat="Revit Sols"
                            @seeList="seeTestList"
                            @continue="onFloorSelect"
                            @cancel="onCancel" />
@@ -84,8 +84,13 @@ with this file. If not, see
         Confirmation
       </v-stepper-step>
       <v-stepper-content :step="structureStep + 1">
+        <v-btn color="red darken-1"
+               flat
+               @click="onCancel">
+          Cancel
+        </v-btn>
         <v-btn color="primary"
-               @click="e1 = 1">
+               @click="onGenerate">
           Générer
         </v-btn>
       </v-stepper-content>
@@ -101,9 +106,7 @@ with this file. If not, see
 
 <script>
 import Basicselectmodel from "../BasicSelectModel.vue";
-// import AdvenceLevelSettings from "./levels.vue";
 import ShowTestList from "../showTestList.vue";
-
 import AdvenceSettings from "./AdvenceSettings.vue";
 import AdvenceSettingStructure from "./AdvenceSettingStructure.vue";
 
@@ -134,6 +137,10 @@ export default {
       isRoomRefOK: true,
       showTestList: false,
       basic: {},
+      levelSelect: [],
+      roomSelect: [],
+      floorSelect: [],
+      structureSelect: [],
       testItems: []
     };
   },
@@ -151,22 +158,47 @@ export default {
       this.basic = value;
     },
     onLevelSelect(value) {
-      console.log("onLevelSelect", value);
+      this.levelSelect = value;
       this.e1 = this.e1 + 1;
     },
     onRoomSelect(value) {
-      console.log("onRoomSelect", value);
+      this.roomSelect = value;
       this.e1 = this.e1 + 1;
     },
     onFloorSelect(value) {
-      console.log("onFloorSelect", value);
+      this.floorSelect = value;
       this.e1 = this.e1 + 1;
     },
     onStructureSelect(value) {
-      console.log("onStructureSelect", value);
+      this.structureSelect = value;
       this.e1 = this.e1 + 1;
     },
-
+    onGenerate() {
+      const cfg = {
+        basic: this.basic,
+        levelSelect: this.createData(this.levelSelect),
+        roomSelect: this.createData(this.roomSelect),
+        structureSelect: this.createData(this.structureSelect)
+      };
+      if (this.isRoomRefOK === true) {
+        Object.assign(cfg, { floorSelect: this.createData(this.floorSelect) });
+        // } else {
+        //   Object.assign(cfg, { floorSelect: [] });
+      }
+      this.$emit("onGenerate", cfg);
+    },
+    createData(lstObj) {
+      const res = [];
+      for (const d of lstObj) {
+        const obj = {
+          key: d.key.toString(),
+          value: d.value.toString()
+        };
+        if (d.isCat === true) Object.assign(obj, { isCat: true });
+        res.push(obj);
+      }
+      return res;
+    },
     async seeTestList(dataRegexp) {
       console.log("dataRegexp", dataRegexp);
       const model = getModelByName(this.basic.selectedModel);

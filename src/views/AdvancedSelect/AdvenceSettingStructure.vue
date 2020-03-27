@@ -165,18 +165,31 @@ export default {
       }
     },
     onContinue() {
-      this.$emit("continue");
+      try {
+        const data = this.createData();
+        this.$emit("continue", data);
+      } catch (e) {
+        console.error(e);
+        this.snackbarMessage = e.message;
+        this.snackbarError = true;
+      }
+    },
+    createData() {
+      const data = [];
+      for (const catName of this.catLstRes) {
+        data.push(createCat(catName));
+      }
+      for (const item of this.items) {
+        data.push({
+          key: createInput(item.keyType, item.key, item.keyFlag),
+          value: createInput(item.valType, item.val, item.valFlag)
+        });
+      }
+      return data;
     },
     onSeeList() {
-      const data = [];
       try {
-        if (this.useCat === true) data.push(createCat(this.revitCat));
-        for (const item of this.items) {
-          data.push({
-            key: createInput(item.keyType, item.key, item.keyFlag),
-            value: createInput(item.valType, item.val, item.valFlag)
-          });
-        }
+        const data = this.createData();
         this.$emit("seeList", data);
       } catch (e) {
         console.error(e);
