@@ -72,12 +72,12 @@ export default {
       bimSelected: [],
       items: [],
       categories: [],
-      dialog: false,
       intersects: [],
       spin: false,
       models: [],
       arcModel: [],
-      computBimSelected: []
+      computBimSelected: [],
+      contextId: ""
       //contain the externalId of the categories and their names
     };
   },
@@ -109,20 +109,21 @@ export default {
     async addObjectToContext() {
       this.spin = true;
       try {
-        // await isolateFinishFloor(this.manager, this.viewer, this.models);
+        const spatialConfig = await this.manager.getSpatialConfig();
+        const config = spatialConfig.getConfigFromContextId(this.contextId);
         const intersects = await getIntersects(
           this.manager,
           this.bimSelected,
-          this.arcModel
+          this.arcModel,
+          config
         );
-        console.log("intersects res => ", intersects);
         const equipmentInfo = await getEquipmentInfo(
           this.manager,
-          intersects,
-          this.bimSelected
+          config,
+          intersects
         );
         console.log("equipmentInfo res => ", equipmentInfo);
-        await addEquipmentInContext(this.manager, equipmentInfo);
+        await addEquipmentInContext(equipmentInfo, config);
       } catch (e) {
         console.error(e);
         throw e;
@@ -183,8 +184,8 @@ export default {
         }
       }
     },
-    opened() {
-      this.dialog = true;
+    opened(contextId) {
+      this.contextId = contextId;
       window.isolate = isolateFinishFloor.bind(
         this,
         this.manager,

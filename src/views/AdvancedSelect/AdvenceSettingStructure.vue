@@ -152,6 +152,13 @@ export default {
       if (this.modelName) {
         const model = getModelByName(this.modelName);
         this.catLst = await getCatFromRvtModel(model);
+        const register = [
+          "Revit Murs",
+          "Revit Portes",
+          "Revit Sols",
+          "Revit Fenêtres"
+        ];
+        this.catLstRes = this.catLst.filter(item => register.includes(item));
       }
     }
   },

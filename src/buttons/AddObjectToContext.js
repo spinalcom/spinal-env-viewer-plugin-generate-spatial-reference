@@ -25,6 +25,7 @@
 import { SpinalContextApp } from 'spinal-env-viewer-context-menu-service';
 
 const { spinalPanelManagerService } = require("spinal-env-viewer-panel-manager-service");
+import GeographicService from 'spinal-env-viewer-context-geographic-service';
 
 export class ButtonAddObjectToCategory extends SpinalContextApp {
 
@@ -39,11 +40,15 @@ export class ButtonAddObjectToCategory extends SpinalContextApp {
     this.action = this.openPanel.bind(this);
   }
 
-  isShown() {
-    return Promise.resolve(true);
+  isShown(option) {
+    if (option.selectedNode === option.context &&
+      option.selectedNode.type.get() === GeographicService.constants.CONTEXT_TYPE) {
+      return Promise.resolve(true);
+    }
+    return Promise.resolve(-1);
   }
 
-  openPanel() {
-    spinalPanelManagerService.openPanel("DialogAddObject");
+  openPanel(option) {
+    spinalPanelManagerService.openPanel("DialogAddObject", option.selectedNode.id.get());
   }
 }

@@ -27,10 +27,10 @@ var THREE = require('three');
 var { enumMeshTriangles } = require('./enumMeshTriangles');
 
 module.exports = function (self) {
-  function pushIntersection(targetArray, centerPoint, dbId, distance) {
+  function pushIntersection(targetArray, centerPoint, dbId, modelId, distance) {
     for (const obj of targetArray) {
       if (obj.origin.dbId === centerPoint.dbId) {
-        if (obj.intersections.distance < distance) {
+        if (obj.intersections.distance > distance) {
           obj.intersections.distance = distance;
           obj.intersections.dbId = dbId;
         }
@@ -39,12 +39,13 @@ module.exports = function (self) {
     }
     targetArray.push({
       origin: centerPoint,
-      intersections: { distance, dbId }
+      intersections: { distance, modelId, dbId }
     });
   }
 
   self.addEventListener('message', function (ev) {
     const { workId, data } = ev.data;
+    console.log("start work", data);
     const centerPoints = data.centerPoints;
     const geometries = data.geometries;
 
@@ -65,15 +66,21 @@ module.exports = function (self) {
           ray.applyMatrix4(inverseMatrix);
           // test with boundingbox
           const bBox = new THREE.Box3(mesh.bbox.min, mesh.bbox.max);
-          let intersectionPoint = ray.intersectBox(bBox, new THREE.Vector3());
-          if (intersectionPoint) {
+          let bboxFound = false;
+          if (bBox.containsPoint(centerPoint)) { // test if point inside bbox
+            bboxFound = true;
+          } else { // test if point on top of bbox
+            let intersectionPoint = ray.intersectBox(bBox, new THREE.Vector3());
+            if (intersectionPoint) bboxFound = true;
+          }
+          if (bboxFound) {
             // test with boundingbox ok -> test with triangles
             enumMeshTriangles(mesh.geometry, function (vA, vB, vC) {
               let intersectionPoint = ray.intersectTriangle(vC, vB, vA, false, new THREE.Vector3());
               if (!intersectionPoint) return;
               intersectionPoint.applyMatrix4(mesh.matrixWorld);
               const distance = rayOrig.origin.distanceTo(intersectionPoint);
-              pushIntersection(dbObjIntersections, centerPoint, intersectionObjs.dbId, distance);
+              pushIntersection(dbObjIntersections, centerPoint, intersectionObjs.dbId, intersectionObjs.modelId, distance);
             });
           }
         }

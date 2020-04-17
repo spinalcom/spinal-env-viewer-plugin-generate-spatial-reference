@@ -56,6 +56,16 @@ with this file. If not, see
                          @cancel="onCancel">
           <v-checkbox v-model="isRoomRefOK"
                       :label="`Utiliser les pieces comme reference`" />
+          <template v-if="isRoomRefOK">
+            <v-text-field v-model="floorRoomNbr"
+                          label="Nom de l'attribut désignant le numéro de la pièce" />
+            <v-text-field v-model="floorRoomName"
+                          label="Nom de l'attribut désignant le nom de la pièce"
+                          placeholder="Facultatif" />
+            <v-text-field v-model="floorLevelName"
+                          label="Nom de l'attribut désignant le nom de l'étage"
+                          placeholder="Facultatif" />
+          </template>
         </AdvenceSettings>
       </v-stepper-content>
       <template v-if="!isRoomRefOK">
@@ -67,7 +77,16 @@ with this file. If not, see
           <AdvenceSettings revit-cat="Revit Sols"
                            @seeList="seeTestList"
                            @continue="onFloorSelect"
-                           @cancel="onCancel" />
+                           @cancel="onCancel">
+            <v-text-field v-model="floorRoomNbr"
+                          label="Nom de l'attribut désignant le numéro de la pièce" />
+            <v-text-field v-model="floorRoomName"
+                          label="Nom de l'attribut désignant le nom de la pièce"
+                          placeholder="Facultatif" />
+            <v-text-field v-model="floorLevelName"
+                          label="Nom de l'attribut désignant le nom de l'étage'"
+                          placeholder="Facultatif" />
+          </AdvenceSettings>
         </v-stepper-content>
       </template>
 
@@ -141,7 +160,10 @@ export default {
       roomSelect: [],
       floorSelect: [],
       structureSelect: [],
-      testItems: []
+      testItems: [],
+      floorRoomNbr: "Number",
+      floorRoomName: "",
+      floorLevelName: ""
     };
   },
   computed: {
@@ -182,9 +204,17 @@ export default {
       };
       if (this.isRoomRefOK === true) {
         Object.assign(cfg, { floorSelect: this.createData(this.floorSelect) });
-        // } else {
-        //   Object.assign(cfg, { floorSelect: [] });
       }
+      if (this.floorRoomNbr) {
+        Object.assign(cfg, { floorRoomNbr: this.floorRoomNbr });
+      }
+      if (this.floorRoomName) {
+        Object.assign(cfg, { floorRoomName: this.floorRoomName });
+      }
+      if (this.floorLevelName) {
+        Object.assign(cfg, { floorLevelName: this.floorLevelName });
+      }
+
       this.$emit("onGenerate", cfg);
     },
     createData(lstObj) {
@@ -200,7 +230,6 @@ export default {
       return res;
     },
     async seeTestList(dataRegexp) {
-      console.log("dataRegexp", dataRegexp);
       const model = getModelByName(this.basic.selectedModel);
       this.testItems = await getObjFromRvtModel(model, dataRegexp);
 

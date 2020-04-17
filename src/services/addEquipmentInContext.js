@@ -22,10 +22,27 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { SpinalGraphService } from "spinal-env-viewer-graph-service";
+import {
+  SpinalGraphService, SPINAL_RELATION_TYPE, SPINAL_RELATION_LST_PTR_TYPE, SPINAL_RELATION_PTR_LST_TYPE
+} from "spinal-env-viewer-graph-service";
+import GeographicService from 'spinal-env-viewer-context-geographic-service';
 
-export async function addEquipmentInContext(manager, equipmentInfo) {
-  const context = manager.context;
+async function getRoomIdFromDbId(externalId, contextId) {
+  const roomReferenceContext = SpinalGraphService
+    .getContext(GeographicService.constants.ROOM_REFERENCE_CONTEXT);
+  const rooms = await SpinalGraphService
+    .getChildren(roomReferenceContext.info.id.get(),
+      [GeographicService.constants.ROOM_RELATION]);
+
+  for (let i = 0; i < rooms.length; i++) {
+    if (rooms[i].externalId.get() === externalId && rooms[i].contextIds.has(contextId)) {
+      return rooms[i].id.get();
+    }
+  }
+}
+
+export async function addEquipmentInContext(equipmentInfo, config) {
+  // const context = await manager.getContextFromConfig(config);
   let fail = [];
   const batchSize = 10;
   let turn = 0;
@@ -41,14 +58,14 @@ export async function addEquipmentInContext(manager, equipmentInfo) {
         continue;
       }
       // eslint-disable-next-line no-await-in-loop
-      let roomId = await manager.getRoomIdFromDbId(info.roomId);
+      let roomId = await getRoomIdFromDbId(info.roomId, config.contextId.get());
       let model = info.model;
       // eslint-disable-next-line no-await-in-loop
       let bimObj = await getProps(info.bimObject, model);
       if (typeof roomId !== "undefined") {
         proms.push(
           addBIMObject(
-            context.info.id.get(),
+            config.contextId.get(),
             roomId,
             info.bimObject,
             bimObj.name,
@@ -84,12 +101,70 @@ export async function addEquipmentInContext(manager, equipmentInfo) {
   return res;
 }
 
-function addBIMObject(contextId, roomId, bimObj, bimObjName, model) {
+
+async function getBimObjectParentRoom(nodeBimObject) {
+  const parentPtrLst = nodeBimObject.parents.getElement(GeographicService.constants.EQUIPMENT_RELATION);
+  if (!parentPtrLst) return [];
+  const prom = [];
+  for (let idx = 0; idx < parentPtrLst.length; idx++) {
+    prom.push(parentPtrLst[idx].load());
+  }
+  const relationsParent = await Promise.all(prom);
+  const parents = await Promise.all(relationsParent.map(item => item.parent.load()));
+  return parents.filter(item => {
+    return item.info.type.get() === GeographicService.constants.ROOM_TYPE;
+  });
+}
+
+async function removeBimObjectFromOtherRoom(parentLst, nodeRoom, bimObject) {
+  let found = false;
+  const prom = [];
+  for (const parent of parentLst) {
+    if (nodeRoom === parent) { found = true; continue; }
+    if (parent.hasRelation(GeographicService.constants.EQUIPMENT_RELATION, SPINAL_RELATION_TYPE)) {
+      prom.push(parent.removeChild(bimObject,
+        GeographicService.constants.EQUIPMENT_RELATION, SPINAL_RELATION_TYPE));
+    }
+    if (parent.hasRelation(GeographicService.constants.EQUIPMENT_RELATION, SPINAL_RELATION_LST_PTR_TYPE)) {
+      prom.push(parent.removeChild(bimObject,
+        GeographicService.constants.EQUIPMENT_RELATION, SPINAL_RELATION_LST_PTR_TYPE));
+    }
+    if (parent.hasRelation(GeographicService.constants.EQUIPMENT_RELATION, SPINAL_RELATION_PTR_LST_TYPE)) {
+      prom.push(parent.removeChild(bimObject,
+        GeographicService.constants.EQUIPMENT_RELATION, SPINAL_RELATION_PTR_LST_TYPE));
+    }
+  }
+  await Promise.all(prom);
+  return found;
+}
+
+async function addBIMObject(contextId, roomId, dbId, bimObjName, model) {
   try {
-    return window.spinal.BimObjectService.addBIMObject(contextId, roomId, bimObj, bimObjName, model);
+    const bimObject = await window.spinal.BimObjectService.getBIMObject(dbId, model);
+    if (typeof bimObject !== "undefined") {
+      const nodeBimObject = SpinalGraphService.getRealNode(bimObject.id.get());
+      const nodeRoom = SpinalGraphService.getRealNode(roomId);
+      const parentLst = await getBimObjectParentRoom(nodeBimObject);
+      if (parentLst.length > 0) {
+        const found = removeBimObjectFromOtherRoom(parentLst, nodeRoom, nodeBimObject);
+        if (found) return bimObject;
+      }
+      const context = SpinalGraphService.getRealNode(contextId);
+      await nodeRoom.addChildInContext(nodeBimObject, GeographicService.constants.EQUIPMENT_RELATION,
+        SPINAL_RELATION_LST_PTR_TYPE, context);
+      return bimObject;
+    }
+    const child = await window.spinal.BimObjectService.createBIMObject(dbId, bimObjName, model);
+    const nodeBimObject = SpinalGraphService.getRealNode(child.id.get());
+    const nodeRoom = SpinalGraphService.getRealNode(roomId);
+    const context = SpinalGraphService.getRealNode(contextId);
+    await nodeRoom.addChildInContext(nodeBimObject, GeographicService.constants.EQUIPMENT_RELATION,
+      SPINAL_RELATION_LST_PTR_TYPE, context);
+    return child;
   } catch (e) {
-    console.log('Error addBIMObject', contextId, roomId, bimObj, bimObjName, model);
-    return e;
+    console.log('Error addBIMObject', contextId, roomId, dbId, bimObjName, model);
+    console.error(e);
+    throw e;
   }
 }
 

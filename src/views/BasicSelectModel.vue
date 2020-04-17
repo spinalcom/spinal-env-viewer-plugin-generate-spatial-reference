@@ -25,11 +25,12 @@ with this file. If not, see
 <template>
   <v-card>
     <v-card-text>
-      <div id="spinalbasicselectcard" />
+      <slot />
       <v-select :items="bimfiles"
                 attach="#spinalbasicselectcard"
                 label="Selection du model architecture"
                 @change="onModelSelected" />
+      <div id="spinalbasicselectcard" />
       <v-text-field v-model="buildingNameCompu"
                     placeholder="Nom du batiment"
                     label="Nom du batiement" />

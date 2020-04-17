@@ -22,13 +22,14 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-export async function generateContext(manager, bimFile, buildingName, addLevel) {
+export async function generateContext(manager, bimFile, spatialConfig) {
   const svfVersionFile = await window.spinal.SpinalForgeViewer.getSVF(
     bimFile.element,
     bimFile.info.id.get(),
     bimFile.info.name.get()
   );
-
+  const configName = spatialConfig.configName.get();
+  const addLevel = spatialConfig.basic.addLevel.get();
   let path = window.location.origin + svfVersionFile.path;
   const m = await loadModel(path, {});
   window.spinal.BimObjectService.addModel(
@@ -39,15 +40,15 @@ export async function generateContext(manager, bimFile, buildingName, addLevel) 
     bimFile.info.name.get()
   );
   await manager.init();
-  const building = await manager.getBuilding(buildingName);
+  const building = await manager.getBuilding(spatialConfig);
   console.log("building", building);
   if (addLevel) {
-    return manager.generateContext(buildingName, m);
+    return manager.generateContext(configName, m);
   } else {
     if (typeof building !== "undefined") {
-      return manager.updateContext(buildingName, m);
+      return manager.updateContext(configName, m);
     }
-    return manager.generateContext(buildingName, m);
+    return manager.generateContext(configName, m);
   }
 }
 

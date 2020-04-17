@@ -42,7 +42,7 @@ export function enumMeshTriangles(geometry, callback) {
   }
 
   var positions = geometry.vb || attributes.position.array;
-  var normals = (geometry.vb || attributes.normal) && attributes.normal.array;
+  var normals = geometry.vb || attributes.normal && attributes.normal.array; // eslint-disable-line no-mixed-operators
   var stride = geometry.vb ? geometry.vbstride : 3;
   // Get the offset to positions in the buffer. Be careful, 2D buffers
   // don't use the 'position' attribute for positions. Reject those.

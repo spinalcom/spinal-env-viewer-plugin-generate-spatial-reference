@@ -24,6 +24,7 @@
 
 // import { enumMeshTriangles } from './rayUtils/enumMeshTriangles';
 import { RayWorkerManager } from './rayUtils/workerManager';
+import q from "q";
 
 function getCenterObjects(array) {
   const res = [];
@@ -41,38 +42,43 @@ async function getMeshsData(array, viewer) {
   const res = [];
   for (const { model, dbId } of array) {
     for (const dbIdItem of dbId) {
-      // eslint-disable-next-line no-await-in-loop
-      let ids = await getFragIds(dbIdItem, model);
-      if (!Array.isArray(ids)) { ids = [ids]; }
-      const meshs = ids.map(fragId => viewer.impl.getRenderProxy(model, fragId));
-      const bbox = getModifiedWorldBoundingBox(ids, model);
-      let center = new window.THREE.Vector3();
-      bbox.center(center);
-      const dataMesh = meshs.map(mesh => {
-        return {
-          geometry: {
-            vb: mesh.geometry.vb,
-            vblayout: mesh.geometry.vblayout,
-            attributes: mesh.geometry.attributes,
-            ib: mesh.geometry.ib,
-            indices: mesh.geometry.indices,
-            index: mesh.geometry.index,
-            offsets: mesh.geometry.offsets,
-            vbstride: mesh.geometry.vbstride
-          },
-          matrixWorld: mesh.matrixWorld,
-          center,
-          bbox: {
-            min: bbox.min,
-            max: bbox.max
-          }
-        };
-      });
-      res.push({
-        dataMesh,
-        dbId: dbIdItem,
-        modelId: model.id
-      });
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        let ids = await getFragIds(dbIdItem, model);
+        if (!Array.isArray(ids)) { ids = [ids]; }
+        const meshs = ids.map(fragId => viewer.impl.getRenderProxy(model, fragId));
+        const bbox = getModifiedWorldBoundingBox(ids, model);
+        let center = new window.THREE.Vector3();
+        bbox.center(center);
+        const dataMesh = meshs.map(mesh => {
+          return {
+            geometry: {
+              vb: mesh.geometry.vb,
+              vblayout: mesh.geometry.vblayout,
+              attributes: mesh.geometry.attributes,
+              ib: mesh.geometry.ib,
+              indices: mesh.geometry.indices,
+              index: mesh.geometry.index,
+              offsets: mesh.geometry.offsets,
+              vbstride: mesh.geometry.vbstride
+            },
+            matrixWorld: mesh.matrixWorld,
+            center,
+            bbox: {
+              min: bbox.min,
+              max: bbox.max
+            }
+          };
+        });
+        res.push({
+          dataMesh,
+          dbId: dbIdItem,
+          modelId: model.id
+        });
+      } catch (e) {
+        console.log("getMeshsData no fragId in", dbIdItem);
+        continue;
+      }
     }
   }
   return res;
@@ -87,10 +93,17 @@ async function getMeshsData(array, viewer) {
  * @returns
  */
 export async function cast(from, to, viewer) {
-  const [centerPoints, geometries] = await Promise.all([getCenterObjects(from), getMeshsData(to, viewer)]);
-  const rayWorkerManager = RayWorkerManager.getInstance();
+  try {
+    const [centerPoints, geometries] = await Promise.all([getCenterObjects(from), getMeshsData(to, viewer)]);
+    console.log("cast", centerPoints, geometries);
 
-  return rayWorkerManager.work({ centerPoints, geometries }); // send the worker a message
+    const rayWorkerManager = RayWorkerManager.getInstance();
+
+    return rayWorkerManager.work({ centerPoints, geometries }); // send the worker a message
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
 }
 
 function getCenter(dbId, model) {
@@ -109,10 +122,12 @@ function getCenter(dbId, model) {
 }
 
 function getFragIds(dbId, model) {
-  return new Promise((resolve) => {
-    let it = model.getInstanceTree();
-    it.enumNodeFragments(dbId, resolve, false);
-  });
+  const defer = q.defer();
+  let it = model.getInstanceTree();
+  it.enumNodeFragments(dbId, (res) => {
+    defer.resolve(res);
+  }, false);
+  return defer.promise.timeout(500, `no fragId for ${dbId}`);
 }
 
 function getModifiedWorldBoundingBox(fragIds, model) {

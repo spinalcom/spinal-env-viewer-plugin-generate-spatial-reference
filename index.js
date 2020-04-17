@@ -36,9 +36,10 @@ import { ButtonGenerateContext } from "./src/buttons/generate";
 import { ButtonAddObjectToCategory } from "./src/buttons/AddObjectToContext";
 
 export const TOP_BAR_HOOK_NAME = 'GraphManagerTopBar';
+const SIDE_BAR_HOOK_NAME = "GraphManagerSideBar";
 //export const mure porte fenetere
 spinalContextMenuService.registerApp(TOP_BAR_HOOK_NAME, new ButtonGenerateContext(), [7]);
-spinalContextMenuService.registerApp(TOP_BAR_HOOK_NAME, new ButtonAddObjectToCategory(), [7]);
+spinalContextMenuService.registerApp(SIDE_BAR_HOOK_NAME, new ButtonAddObjectToCategory(), [7]);
 
 
 // SpinalMountExtention.mount({

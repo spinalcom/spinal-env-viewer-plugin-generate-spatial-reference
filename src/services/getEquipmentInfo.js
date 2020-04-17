@@ -22,26 +22,37 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
+// array of {
+//   origin: {dbId: 7934, modelId: 2, center: {…}}
+//   intersections: { distance: 9.696686029434204, modelId: 2, dbId: 11560 }
+// }
+
+function getNearestIntersect(intersects) {
+  if (intersects === 0) return undefined;
+  let res = intersects[0];
+  for (const intersect of intersects) {
+    if (res.intersections.distance > intersect.intersections.distance) res = intersect;
+  }
+  return res;
+}
+
+function getModelByModelId(modelId) {
+  const bimFileId = window.spinal.BimObjectService.mappingModelIdBimFileId[modelId].bimFileId;
+  return window.spinal.BimObjectService.getModelByBimfile(bimFileId);
+}
+
 /* eslint-disable no-await-in-loop */
-export async function getEquipmentInfo(manager, intersects) {
+export async function getEquipmentInfo(manager, config, intersects) {
   let equipmentInfo = [];
-  for (const spinalIntersection of intersects) {
-    let bimObject = spinalIntersection.id;
-    let bimObjectModel = spinalIntersection.model;
-    if (!spinalIntersection.intersect) {
-      // No intersect found
-      equipmentInfo.push({
-        bimObject,
-        model: bimObjectModel,
-        floor_finish: null,
-        roomId: null
-      });
-      continue;
-    }
-    let floor_finish = spinalIntersection.intersect.dbId;
-    let floor_finishModel = spinalIntersection.intersect.model;
+  for (const spinalIntersections of intersects) {
+    const spinalIntersection = getNearestIntersect(spinalIntersections);
+    let bimObject = spinalIntersection.origin.dbId;
+    let bimObjectModel = getModelByModelId(spinalIntersection.origin.modelId);
+    let floor_finish = spinalIntersection.intersections.dbId;
+    let floor_finishModel = getModelByModelId(spinalIntersection.intersections.modelId);
+
     // eslint-disable-next-line require-atomic-updates
-    manager.modelArchi = await manager.getArchiModel(floor_finishModel);
+    manager.modelArchi = await manager.getArchiModel(floor_finishModel, config.configName.get());
     let roomId = await manager.getRoomIdFromFloorFinish(floor_finish);
     equipmentInfo.push({
       bimObject,

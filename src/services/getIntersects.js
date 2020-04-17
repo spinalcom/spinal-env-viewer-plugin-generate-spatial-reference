@@ -66,8 +66,8 @@ function pushToModel(targetArray, ids, model) {
 
 }
 
-export async function getIntersects(manager, bimSelected, arcModels) {
-  console.log("getIntersects", manager, bimSelected, arcModels);
+export async function getIntersects(manager, bimSelected, arcModels, config) {
+  console.log("getIntersects");
 
   const selection = [];
   for (const bimSelect of bimSelected) {
@@ -77,16 +77,13 @@ export async function getIntersects(manager, bimSelected, arcModels) {
     ).selection;
     pushToModel(selection, ids, bimSelect.model);
   }
-  console.log("getIntersects selection", selection);
-
-
-  const to = await Promise.all(arcModels.map(name => getModelByName(manager, name)));
-  console.log("getIntersects to", to);
-
+  const to = await Promise.all(
+    arcModels.map(name => getModelByName(manager, config.configName.get(), name))
+  );
+  console.log("to ->", to);
 
   const intersects = await cast(selection, to, window.spinal.ForgeViewer.viewer);
-
-  console.log("intersects", intersects);
+  return intersects;
 }
 
 
@@ -146,11 +143,11 @@ export async function getIntersects(manager, bimSelected, arcModels) {
 //   }
 //   return false;
 // }
-async function getModelByName(manager, name) {
+async function getModelByName(manager, configName, name) {
   const model = window.spinal.BimObjectService.mappingNameByModel[name];
   return {
     model,
-    dbId: await manager.getFloorFinishId(model)
+    dbId: await manager.getFloorFinishId(configName, model)
     // dbId: await Promise.resolve([6630, 10122, 10131, 10141, 10150,
     //   10160, 10170, 10183, 10194, 10208, 10217, 10271, 10321, 10334, 10346,
     //   10362, 10369, 10376, 10383, 10390, 10397, 10404, 10413, 10423, 10431,

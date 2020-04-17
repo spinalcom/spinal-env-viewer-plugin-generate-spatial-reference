@@ -37,7 +37,12 @@ with this file. If not, see
           <Basicselectmodel v-if="active === 0"
                             :bimfiles="bimfiles"
                             :btn-disabled="spin"
-                            @continue="generate" />
+                            @continue="generate">
+            <v-select v-model="configName"
+                      :items="configNames"
+                      attach="#spinal-modal-gen-spatial-selectconfig" />
+            <div id="spinal-modal-gen-spatial-selectconfig" />
+          </Basicselectmodel>
         </v-tab-item>
         <v-tab-item>
           <AdvencedSelectModel v-if="active === 1"
@@ -66,9 +71,10 @@ export default {
   name: "DialogGenerateContext",
   components: { Basicselectmodel, AdvencedSelectModel },
   data: function() {
-    this.manager = new SM.default.SpatialManager();
     return {
       models: [],
+      configNames: [],
+      configName: "default",
       selectedModel: null,
       dialog: false,
       spin: false,
@@ -85,11 +91,15 @@ export default {
       });
     }
   },
-  mounted() {
-    //TODO find constant
+  async mounted() {
+    this.manager = new SM.default.SpatialManager();
     let context = SpinalGraphService.getContext("BimFileContext");
     if (!context) return;
-
+    const spatialConfig = await this.manager.getSpatialConfig();
+    for (let idx = 0; idx < spatialConfig.data.length; idx++) {
+      const config = spatialConfig.data[idx];
+      this.configNames.push(config.configName.get());
+    }
     //Load the children into the graph service
     SpinalGraphService.getChildren(context.info.id.get(), []);
 
@@ -102,6 +112,9 @@ export default {
   methods: {
     async generate(opt) {
       this.spin = true;
+      const spatialConfig = await this.manager.getSpatialConfig();
+      const config = spatialConfig.getConfig(this.configName);
+      config.basic.set(opt);
       let bimFile;
       for (let i = 0; i < this.models.length; i++) {
         if (this.models[i].info.name.get() === opt.selectedModel) {
@@ -110,12 +123,7 @@ export default {
         }
       }
       try {
-        await generateContext(
-          this.manager,
-          bimFile,
-          opt.buildingName,
-          opt.addLevel
-        );
+        await generateContext(this.manager, bimFile, config);
       } catch (e) {
         console.error(e);
       } finally {
@@ -125,7 +133,7 @@ export default {
     async advancedGenerate(cfg) {
       console.log("cfg", cfg);
       const spatialConfig = await this.manager.getSpatialConfig();
-      spatialConfig.set(cfg);
+      spatialConfig.saveConfig(cfg);
       await this.generate(cfg.basic);
     },
     opened() {
