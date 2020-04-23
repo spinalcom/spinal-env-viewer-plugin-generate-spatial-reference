@@ -41,7 +41,6 @@ export async function generateContext(manager, bimFile, spatialConfig) {
   );
   await manager.init();
   const building = await manager.getBuilding(spatialConfig);
-  console.log("building", building);
   if (addLevel) {
     return manager.generateContext(configName, m);
   } else {

@@ -30,14 +30,14 @@ with this file. If not, see
                          color="primary" />
     <div v-else
          class="geolocate-bimObj-container">
-      <v-flex xs12>
+      <!-- <v-flex xs12>
         <v-select v-model="arcModel"
-                  :items="models"
-                  item-text="name"
-                  attach=".geolocate-bimObj-body"
-                  label="Models contenant l'architecture"
-                  multiple />
-      </v-flex>
+      :items="models"
+      item-text="name"
+      attach=".geolocate-bimObj-body"
+      label="Models contenant l'architecture"
+      multiple />
+      </v-flex> -->
       <table-component :bim-selected="computBimSelected"
                        @seeItem="seeItem"
                        @deleteItem="deleteItem" />
@@ -60,7 +60,7 @@ with this file. If not, see
 import TableComponent from "./tableComponent.vue";
 import * as SM from "spinal-spatial-referential";
 // import { cast } from "../services/RayCaster";
-import { isolateFinishFloor } from "../services/isolateFinishFloor";
+// import { isolateFinishFloor } from "../services/isolateFinishFloor";
 import { getEquipmentInfo } from "../services/getEquipmentInfo";
 import { getIntersects } from "../services/getIntersects";
 import { addEquipmentInContext } from "../services/addEquipmentInContext";
@@ -109,21 +109,18 @@ export default {
     async addObjectToContext() {
       this.spin = true;
       try {
-        const spatialConfig = await this.manager.getSpatialConfig();
-        const config = spatialConfig.getConfigFromContextId(this.contextId);
+        // const spatialConfig = await this.manager.getSpatialConfig();
+        // const config = spatialConfig.getConfigFromContextId(this.contextId);
         const intersects = await getIntersects(
-          this.manager,
           this.bimSelected,
-          this.arcModel,
-          config
+          this.contextId
         );
         const equipmentInfo = await getEquipmentInfo(
-          this.manager,
-          config,
-          intersects
+          intersects,
+          this.contextId
         );
         console.log("equipmentInfo res => ", equipmentInfo);
-        await addEquipmentInContext(equipmentInfo, config);
+        await addEquipmentInContext(equipmentInfo, this.contextId);
       } catch (e) {
         console.error(e);
         throw e;
@@ -186,23 +183,23 @@ export default {
     },
     opened(contextId) {
       this.contextId = contextId;
-      window.isolate = isolateFinishFloor.bind(
-        this,
-        this.manager,
-        this.viewer,
-        this.models
-      ); // testing
+      // window.isolate = isolateFinishFloor.bind(
+      //   this,
+      //   this.manager,
+      //   this.viewer,
+      //   this.models
+      // ); // testing
 
-      for (let key in window.spinal.BimObjectService.mappingNameByModel) {
-        if (
-          window.spinal.BimObjectService.mappingNameByModel.hasOwnProperty(key)
-        ) {
-          this.models.push({
-            name: key,
-            model: window.spinal.BimObjectService.mappingNameByModel[key]
-          });
-        }
-      }
+      // for (let key in window.spinal.BimObjectService.mappingNameByModel) {
+      //   if (
+      //     window.spinal.BimObjectService.mappingNameByModel.hasOwnProperty(key)
+      //   ) {
+      //     this.models.push({
+      //       name: key,
+      //       model: window.spinal.BimObjectService.mappingNameByModel[key]
+      //     });
+      //   }
+      // }
     },
     removed() {},
     close() {},

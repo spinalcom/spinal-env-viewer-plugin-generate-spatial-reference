@@ -22,6 +22,8 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
+import { GEO_REFERENCE_ROOM_RELATION } from '../constant';
+
 // array of {
 //   origin: {dbId: 7934, modelId: 2, center: {…}}
 //   intersections: { distance: 9.696686029434204, modelId: 2, dbId: 11560 }
@@ -41,24 +43,27 @@ function getModelByModelId(modelId) {
   return window.spinal.BimObjectService.getModelByBimfile(bimFileId);
 }
 
-/* eslint-disable no-await-in-loop */
-export async function getEquipmentInfo(manager, config, intersects) {
+export async function getEquipmentInfo(intersects, contextId) {
   let equipmentInfo = [];
+  /* eslint-disable no-await-in-loop */
   for (const spinalIntersections of intersects) {
     const spinalIntersection = getNearestIntersect(spinalIntersections);
-    let bimObject = spinalIntersection.origin.dbId;
+    let bimObjectDbId = spinalIntersection.origin.dbId;
     let bimObjectModel = getModelByModelId(spinalIntersection.origin.modelId);
-    let floor_finish = spinalIntersection.intersections.dbId;
-    let floor_finishModel = getModelByModelId(spinalIntersection.intersections.modelId);
+    let roomRefObjDbId = spinalIntersection.intersections.dbId;
+    let roomRefObjModel = getModelByModelId(spinalIntersection.intersections.modelId);
+    const refObjRef = await window.spinal.BimObjectService.getBIMObject(roomRefObjDbId, roomRefObjModel);
+    const refObj = await window.spinal.spinalGraphService.getRealNode(refObjRef.id.get());
 
-    // eslint-disable-next-line require-atomic-updates
-    manager.modelArchi = await manager.getArchiModel(floor_finishModel, config.configName.get());
-    let roomId = await manager.getRoomIdFromFloorFinish(floor_finish);
+    const rooms = await refObj.getParents(GEO_REFERENCE_ROOM_RELATION);
+    rooms.filter((room) => {
+      return room.contextIds.has(contextId);
+    });
+
     equipmentInfo.push({
-      bimObject,
-      model: bimObjectModel,
-      floor_finish,
-      roomId
+      bimObjectDbId,
+      bimObjectModel,
+      rooms
     });
   }
   return equipmentInfo;
