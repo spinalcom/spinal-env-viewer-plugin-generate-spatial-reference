@@ -53,7 +53,7 @@ export async function getEquipmentInfo(intersects, contextId) {
     let roomRefObjDbId = spinalIntersection.intersections.dbId;
     let roomRefObjModel = getModelByModelId(spinalIntersection.intersections.modelId);
     const refObjRef = await window.spinal.BimObjectService.getBIMObject(roomRefObjDbId, roomRefObjModel);
-    const refObj = await window.spinal.spinalGraphService.getRealNode(refObjRef.id.get());
+    const refObj = window.spinal.spinalGraphService.getRealNode(refObjRef.id.get());
 
     const rooms = await refObj.getParents(GEO_REFERENCE_ROOM_RELATION);
     rooms.filter((room) => {
