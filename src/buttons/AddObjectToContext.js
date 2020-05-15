@@ -30,8 +30,8 @@ import GeographicService from 'spinal-env-viewer-context-geographic-service';
 export class ButtonAddObjectToCategory extends SpinalContextApp {
 
   constructor() {
-    super('Ajouter des objets', 'Ajouter des objet au context spatial', {
-      icon: 'add',
+    super('Projection d\'objets au context spatial', 'Projection d\'objets au context spatial', {
+      icon: 'picture_in_picture',
       icon_type: 'in',
       backgroundColor: '#000000',
       fontColor: '#ffffff'

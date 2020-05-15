@@ -30,6 +30,12 @@ import {
   GEO_ROOM_TYPE
 } from '../constant';
 
+import { serviceDocumentation } from 'spinal-env-viewer-plugin-documentation-service';
+import { SpinalAttribute } from 'spinal-models-documentation';
+
+const ATTRIBUT_CAT_NAME = 'default';
+const CAT_NAME_RENAME = 'revit_category';
+
 export async function addEquipmentInContext(equipmentInfo, contextId) {
   let fail = [];
   const batchSize = 10;
@@ -51,7 +57,10 @@ export async function addEquipmentInContext(equipmentInfo, contextId) {
         SpinalGraphService._addNode(room);
         proms.push(
           addBIMObject(contextId, room.getId().get(),
-            info.bimObjectDbId, bimObj.name, info.bimObjectModel)
+            info.bimObjectDbId, bimObj.name, info.bimObjectModel).then((nodeRef)=> {
+            const nodeBimObject = SpinalGraphService.getRealNode(nodeRef.id.get());
+            return addCategoryAttribute(nodeBimObject,bimObj.properties).then(()=> nodeRef);
+          })
         );
       }
       // // eslint-disable-next-line no-await-in-loop
@@ -98,6 +107,45 @@ export async function addEquipmentInContext(equipmentInfo, contextId) {
   };
   console.log(`addEquipmentInContext done`, res);
   return res;
+}
+
+function getCategory(props) {
+  for (const prop of props) {
+    // {displayName: "Category", displayValue: "Revit ", displayCategory: "__category__", attributeName: "Category", type: 20}
+    if (prop.attributeName === "Category" && prop.displayCategory === "__category__") {
+      return prop;
+    }
+  }
+}
+async function addCategoryAttribute(node, props) {
+  let category = await serviceDocumentation.getCategoryByName(node, ATTRIBUT_CAT_NAME);
+  if (typeof category === "undefined") {
+    category = await serviceDocumentation.addCategoryAttribute(node, ATTRIBUT_CAT_NAME);
+  }
+  const prop = getCategory(props);
+  return addAttributeByCategory(node, category, CAT_NAME_RENAME, prop.displayValue);
+}
+
+async function addAttributeByCategory(parentNode, category, label, value) {
+  if (
+    label != undefined &&
+    value != undefined &&
+    value != '' &&
+    label != ''
+  ) {
+    let allAttributes = await serviceDocumentation.getAllAttributes(parentNode);
+    for (let i = 0; i < allAttributes.length; i++) {
+      const element = allAttributes[i];
+      if (element.label.get() == label) {
+        element.value.set(value);
+        return;
+      }
+    }
+    if (category != undefined) {
+      let myChild = new SpinalAttribute(label, value);
+      category.element.push(myChild);
+    }
+  }
 }
 
 
