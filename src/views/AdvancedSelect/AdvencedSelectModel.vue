@@ -28,7 +28,7 @@ with this file. If not, see
                class="advenced-select-model-container spinal-scrollbar"
                vertical>
       <v-stepper-step step="1">
-        Basic paramètres
+        Basic parameters
       </v-stepper-step>
       <v-stepper-content step="1">
         <Basicselectmodel :bimfiles="bimfiles"
@@ -37,7 +37,7 @@ with this file. If not, see
       </v-stepper-content>
 
       <v-stepper-step step="2">
-        Niveaux
+        Levels
       </v-stepper-step>
       <v-stepper-content step="2">
         <AdvenceSettings revit-cat="Revit Level"
@@ -47,7 +47,7 @@ with this file. If not, see
       </v-stepper-content>
 
       <v-stepper-step step="3">
-        Locals
+        Rooms
       </v-stepper-step>
       <v-stepper-content step="3">
         <AdvenceSettings revit-cat="Revit Pièces"
@@ -55,23 +55,23 @@ with this file. If not, see
                          @continue="onRoomSelect"
                          @cancel="onCancel">
           <v-checkbox v-model="isRoomRefOK"
-                      :label="`Utiliser les pieces comme reference`" />
+                      :label="`Use Rooms 3D as Reference.`" />
           <template v-if="isRoomRefOK">
             <v-text-field v-model="floorRoomNbr"
-                          label="Nom de l'attribut désignant le numéro de la pièce" />
+                          label="Attribut name of the Room's number in the Level." />
             <v-text-field v-model="floorRoomName"
-                          label="Nom de l'attribut désignant le nom de la pièce"
-                          placeholder="Facultatif" />
+                          label="Attribut name to rename the Room"
+                          placeholder="Optional" />
             <v-text-field v-model="floorLevelName"
-                          label="Nom de l'attribut désignant le nom de l'étage"
-                          placeholder="Facultatif" />
+                          label="Attribut name to rename the Level"
+                          placeholder="Optional" />
           </template>
         </AdvenceSettings>
       </v-stepper-content>
       <template v-if="!isRoomRefOK">
         <v-stepper-step step="4">
-          Sols*
-          <small>facultatif</small>
+          Floors*
+          <small>Optional</small>
         </v-stepper-step>
         <v-stepper-content step="4">
           <AdvenceSettings revit-cat="Revit Sols"
@@ -79,13 +79,13 @@ with this file. If not, see
                            @continue="onFloorSelect"
                            @cancel="onCancel">
             <v-text-field v-model="floorRoomNbr"
-                          label="Nom de l'attribut désignant le numéro de la pièce" />
+                          label="Attribut name of the Room's number in the Level." />
             <v-text-field v-model="floorRoomName"
-                          label="Nom de l'attribut désignant le nom de la pièce"
-                          placeholder="Facultatif" />
+                          label="Attribut name to rename the Room"
+                          placeholder="Optional" />
             <v-text-field v-model="floorLevelName"
-                          label="Nom de l'attribut désignant le nom de l'étage'"
-                          placeholder="Facultatif" />
+                          label="Attribut name to rename the Level"
+                          placeholder="Optional" />
           </AdvenceSettings>
         </v-stepper-content>
       </template>
@@ -100,7 +100,7 @@ with this file. If not, see
                                  @cancel="onCancel" />
       </v-stepper-content>
       <v-stepper-step :step="structureStep + 1">
-        Confirmation
+        Confirm
       </v-stepper-step>
       <v-stepper-content :step="structureStep + 1">
         <v-btn color="red darken-1"
@@ -110,7 +110,7 @@ with this file. If not, see
         </v-btn>
         <v-btn color="primary"
                @click="onGenerate">
-          Générer
+          Generate
         </v-btn>
       </v-stepper-content>
     </v-stepper>

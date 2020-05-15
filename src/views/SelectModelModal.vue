@@ -31,7 +31,7 @@ with this file. If not, see
           Basic
         </v-tab>
         <v-tab ripple>
-          Advancé
+          Advanced
         </v-tab>
         <v-tab-item class="spinal-modal-gen-spatial-tab-item">
           <Basicselectmodel v-if="active === 0"

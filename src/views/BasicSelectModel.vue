@@ -28,15 +28,15 @@ with this file. If not, see
       <slot />
       <v-select :items="bimfiles"
                 attach="#spinalbasicselectcard"
-                label="Selection du model architecture"
+                label="Selection of the model that contains the architecture"
                 @change="onModelSelected" />
       <div id="spinalbasicselectcard" />
       <v-text-field v-model="buildingNameCompu"
-                    placeholder="Nom du batiment"
-                    label="Nom du batiement" />
+                    placeholder="Building Name"
+                    label="Building name" />
 
       <v-checkbox v-model="addLevelCompu"
-                  :label="`Ajouter un etage`" />
+                  :label="`Add only a Level`" />
     </v-card-text>
     <v-card-actions>
       <v-spacer />

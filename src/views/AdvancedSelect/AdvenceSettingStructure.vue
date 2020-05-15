@@ -32,7 +32,7 @@ with this file. If not, see
                 :items="catLst"
                 multiple
                 box
-                label="Utiliser les categories:" />
+                label="Use the Category:" />
 
       <v-data-table :headers="headers"
                     :items="items">
@@ -59,7 +59,7 @@ with this file. If not, see
       </v-data-table>
     </v-card-text>
     <v-card-actions>
-      <v-btn v-tooltip="'Voir list'"
+      <v-btn v-tooltip="'test the filter result'"
              flat
              icon
              :disabled="btnDisabledCompu"
@@ -134,11 +134,11 @@ export default {
       items: [],
       headers: [
         {
-          text: "Nom",
+          text: "Name",
           align: "left",
           value: "key"
         },
-        { text: "Valeur", value: "val" },
+        { text: "Value", value: "val" },
         { text: "Actions", value: "name", sortable: false }
       ],
       modalStatus: null,

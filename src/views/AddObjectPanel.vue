@@ -44,12 +44,12 @@ with this file. If not, see
       <div class="geolocate-bimObj-footer">
         <v-btn dark
                @click="addCategory">
-          Ajouter Selection
+          Add the Selection
         </v-btn>
         <v-btn dark
                :disabled="bimSelected.length == 0"
                @click="addObjectToContext">
-          Placer
+          Project objets in context
         </v-btn>
       </div>
     </div>

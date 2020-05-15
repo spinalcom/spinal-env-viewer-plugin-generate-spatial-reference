@@ -36,7 +36,7 @@ with this file. If not, see
           <v-layout wrap>
             <v-flex xs12
                     sm6>
-              <h4>Nom d'attribut</h4>
+              <h4>Attribut name</h4>
               <v-select v-model="selectKeyFlagType"
                         :items="items"
                         return-object
@@ -53,7 +53,7 @@ with this file. If not, see
             </v-flex>
             <v-flex xs12
                     sm6>
-              <h4>Valeur d'attribut</h4>
+              <h4>Attribut value</h4>
               <v-select v-model="selectValFlagType"
                         :items="items"
                         return-object
@@ -105,9 +105,9 @@ export default {
   data() {
     return {
       items: [
-        { name: "Egale", value: "e" },
-        { name: "Contient", value: "c" },
-        { name: "Expression régulière - Avancée", value: "r" }
+        { name: "Equal", value: "e" },
+        { name: "Contains", value: "c" },
+        { name: "Advanced (Regular expression)", value: "r" }
       ],
       result_key: null,
       result_keyFlag: null,

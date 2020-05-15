@@ -27,7 +27,7 @@ with this file. If not, see
     <v-card-text>
       <slot />
       <v-checkbox v-model="useCat"
-                  :label="`Utiliser la categorie '${revitCat}'`" />
+                  :label="`Use the Category '${revitCat}'`" />
       <v-data-table v-if="useCat === false"
                     :headers="headers"
                     :items="items">
@@ -54,7 +54,7 @@ with this file. If not, see
       </v-data-table>
     </v-card-text>
     <v-card-actions>
-      <v-btn v-tooltip="'Voir list'"
+      <v-btn v-tooltip="'test the filter result'"
              flat
              icon
              :disabled="btnDisabledCompu"
@@ -63,7 +63,7 @@ with this file. If not, see
       </v-btn>
 
       <v-btn v-if="useCat === false"
-             v-tooltip="'Ajouter un flitre'"
+             v-tooltip="'Add a filter'"
              flat
              icon
              :disabled="btnDisabledCompu"
@@ -123,11 +123,11 @@ export default {
       items: [],
       headers: [
         {
-          text: "Nom",
+          text: "Name",
           align: "left",
           value: "key"
         },
-        { text: "Valeur", value: "val" },
+        { text: "Value", value: "val" },
         { text: "Actions", value: "name", sortable: false }
       ],
       modalStatus: null,

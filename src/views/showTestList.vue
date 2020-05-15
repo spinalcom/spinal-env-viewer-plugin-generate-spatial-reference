@@ -66,7 +66,7 @@ with this file. If not, see
           </v-list-tile-content>
           <v-list-tile-action class="action-btn">
             <BtnTooltip icon="arrow_forward_ios"
-                        tooltip="Voir propriétés"
+                        tooltip="See properties"
                         @clicked="onClickDetails(item)" />
           </v-list-tile-action>
         </v-list-tile>

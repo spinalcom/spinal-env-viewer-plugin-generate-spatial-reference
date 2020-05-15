@@ -59,7 +59,7 @@ SpinalForgeExtention.registerExtention('DialogGenerateContext', SpinalForgeExten
   parentContainer: document.body,
 
   panel: {
-    title: "Generation / Mise à jour du context Spatial",
+    title: "Generate / Update Spatial context",
     classname: "spinal-pannel",
     closeBehaviour: "delete"
   },
@@ -79,7 +79,7 @@ SpinalForgeExtention.registerExtention('DialogAddObject', SpinalForgeExtention.c
   parentContainer: document.body,
 
   panel: {
-    title: "Choisissez votre categorie",
+    title: "Project objets in context",
     classname: "spinal-pannel",
     closeBehaviour: "delete"
   },

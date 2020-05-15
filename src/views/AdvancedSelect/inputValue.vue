@@ -20,7 +20,6 @@ not install or use the Program.
 You should have received a copy of the license along
 with this file. If not, see
 <http://resources.spinalcom.com/licenses.pdf>.
--->
 
 <template>
   <v-edit-dialog :return-value.sync="label"
@@ -50,8 +49,8 @@ export default {
   name: "InputValue",
   data() {
     return {
-      items: ["Egale", "Contient", "Avancée (Expression régulière)"],
-      value: "Egale",
+      items: ["Equal", "Contains", "Advanced (Regular expression)"],
+      value: "Equal",
       label: "test"
     };
   },
@@ -76,3 +75,4 @@ export default {
   }
 };
 </script>
+-->

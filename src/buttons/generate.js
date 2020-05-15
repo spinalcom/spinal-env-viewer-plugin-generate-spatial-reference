@@ -26,10 +26,11 @@ import { SpinalContextApp } from 'spinal-env-viewer-context-menu-service';
 
 const { spinalPanelManagerService } = require("spinal-env-viewer-panel-manager-service");
 
+const LABEL = "Spatial Context"
 export class ButtonGenerateContext extends SpinalContextApp {
 
   constructor() {
-    super('Generer context', 'Generer context', {
+    super(LABEL, LABEL, {
       icon: '3d_rotation',
       icon_type: 'in',
       backgroundColor: '#000000',

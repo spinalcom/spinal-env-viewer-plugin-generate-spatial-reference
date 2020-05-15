@@ -20,7 +20,6 @@ not install or use the Program.
 You should have received a copy of the license along
 with this file. If not, see
 <http://resources.spinalcom.com/licenses.pdf>.
--->
 
 <template>
   <v-combobox v-model="model"
@@ -168,3 +167,4 @@ export default {
   }
 };
 </script>
+-->

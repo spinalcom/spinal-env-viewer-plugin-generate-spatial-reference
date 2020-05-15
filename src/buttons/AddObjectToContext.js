@@ -27,10 +27,11 @@ import { SpinalContextApp } from 'spinal-env-viewer-context-menu-service';
 const { spinalPanelManagerService } = require("spinal-env-viewer-panel-manager-service");
 import GeographicService from 'spinal-env-viewer-context-geographic-service';
 
+const LABEL = 'Project objets in context';
 export class ButtonAddObjectToCategory extends SpinalContextApp {
 
   constructor() {
-    super('Projection d\'objets au context spatial', 'Projection d\'objets au context spatial', {
+    super(LABEL, LABEL, {
       icon: 'picture_in_picture',
       icon_type: 'in',
       backgroundColor: '#000000',
