@@ -49,7 +49,7 @@ with this file. If not, see
         <v-btn dark
                :disabled="bimSelected.length == 0"
                @click="addObjectToContext">
-          Project objets in context
+          Project objets
         </v-btn>
       </div>
     </div>
