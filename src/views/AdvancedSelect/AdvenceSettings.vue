@@ -27,7 +27,19 @@ with this file. If not, see
     <v-card-text>
       <slot />
       <v-checkbox v-model="useCat"
-                  :label="`Use the Category '${revitCat}'`" />
+                  label="Use a Category" />
+      <md-field v-if="useCat === true">
+        <md-select id="catLstRes"
+                   v-model="catUsed"
+                   name="catLstRes"
+                   md-dense>
+          <md-option v-for="cat in catLst"
+                     :value="cat">
+            {{ cat }}
+          </md-option>
+        </md-select>
+      </md-field>
+
       <v-data-table v-if="useCat === false"
                     :headers="headers"
                     :items="items">
@@ -109,17 +121,24 @@ with this file. If not, see
 </template>
 
 <script>
-import { createInput, createCat } from "../../services/getObjFromRvtModel";
+import {
+  createInput,
+  createCat,
+  getModelByName,
+  getCatFromRvtModel
+} from "../../services/getObjFromRvtModel";
 import DialogAddCat from "./DialogAddCat.vue";
 export default {
   name: "AdvenceSettings",
   components: { DialogAddCat },
   props: {
-    revitCat: { type: String, required: true }
+    modelName: { require: true, type: String, default: () => "" },
+    revitCat: { type: Array, required: true }
   },
   data() {
     return {
       useCat: true,
+      catUsed: "",
       items: [],
       headers: [
         {
@@ -135,6 +154,20 @@ export default {
       selected: null,
       snackbarError: false
     };
+  },
+  watch: {
+    async modelName() {
+      if (this.modelName) {
+        const model = getModelByName(this.modelName);
+        this.catLst = await getCatFromRvtModel(model);
+        const catLstRes = this.catLst.filter(item =>
+          this.revitCat.includes(item)
+        );
+        if (catLstRes && catLstRes.length > 0) {
+          this.catUsed = catLstRes[0];
+        }
+      }
+    }
   },
   methods: {
     printInput(keyType, name, flag) {
@@ -157,7 +190,7 @@ export default {
     },
     createData() {
       const data = [];
-      if (this.useCat === true) data.push(createCat(this.revitCat));
+      if (this.useCat === true) data.push(createCat(this.catUsed));
       for (const item of this.items) {
         data.push({
           key: createInput(item.keyType, item.key, item.keyFlag),

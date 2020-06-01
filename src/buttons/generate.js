@@ -26,7 +26,7 @@ import { SpinalContextApp } from 'spinal-env-viewer-context-menu-service';
 
 const { spinalPanelManagerService } = require("spinal-env-viewer-panel-manager-service");
 
-const LABEL = "Spatial Context"
+const LABEL = "Spatial Context";
 export class ButtonGenerateContext extends SpinalContextApp {
 
   constructor() {

@@ -38,10 +38,20 @@ with this file. If not, see
                             :bimfiles="bimfiles"
                             :btn-disabled="spin"
                             @continue="generate">
-            <v-select v-model="configName"
+            <md-field>
+              <md-select v-model="configName"
+                         md-dense>
+                <md-option v-for="configName in configNames"
+                           :value="configName">
+                  {{ configName }}
+                </md-option>
+              </md-select>
+            </md-field>
+
+            <!-- <v-select v-model="configName"
                       :items="configNames"
-                      attach="#spinal-modal-gen-spatial-selectconfig" />
-            <div id="spinal-modal-gen-spatial-selectconfig" />
+                      attach="#spinal-modal-gen-spatial-selectconfig" /> -->
+            <!-- <div id="spinal-modal-gen-spatial-selectconfig" /> -->
           </Basicselectmodel>
         </v-tab-item>
         <v-tab-item>
@@ -153,7 +163,9 @@ export default {
 }
 .spinal-modal-progress-bar {
   margin: 0;
-  position: sticky;
+  z-index: 1;
+  position: absolute;
+  bottom: 2px;
 }
 .spinal-modal-gen-spatial-tab,
 .spinal-modal-progress-bar {
@@ -172,6 +184,7 @@ export default {
   min-height: 100%;
   height: 100%;
   position: relative;
+  overflow: hidden;
 }
 .gen-spatial-body * {
   box-sizing: border-box;
@@ -187,12 +200,26 @@ export default {
 .gen-spatial-container > .v-tabs > .v-window {
   height: calc(100% - 50px);
   position: relative;
+  overflow: auto;
 }
-.gen-spatial-container > .v-tabs > .v-window {
-  height: calc(100% - 50px);
-  position: relative;
+
+.gen-spatial-container > .v-tabs > .v-window::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
-.gen-spatial-container > .v-tabs > .v-window > .v-window__container {
+.gen-spatial-container > .v-tabs > .v-window::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  background: rgba(169, 169, 169, 0.9);
+}
+.gen-spatial-container > .v-tabs > .v-window::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.3);
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.spinal-modal-gen-spatial-tab-item > .v-window__container {
   height: 100%;
   position: relative;
 }
@@ -203,6 +230,12 @@ export default {
   > .v-window-item {
   height: 100%;
   position: relative;
+}
+.gen-spatial-container > .v-tabs > .v-tabs__bar {
+  background-color: #2e2e2e;
+}
+.gen-spatial-container .v-window > .v-window__container {
+  height: 100%;
 }
 
 /* .gen-spatial-body > .v-menu__content {

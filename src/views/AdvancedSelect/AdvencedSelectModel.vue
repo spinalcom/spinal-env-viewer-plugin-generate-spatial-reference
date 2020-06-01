@@ -40,7 +40,8 @@ with this file. If not, see
         Levels
       </v-stepper-step>
       <v-stepper-content step="2">
-        <AdvenceSettings revit-cat="Revit Level"
+        <AdvenceSettings :model-name="basic.selectedModel"
+                         :revit-cat="['Revit Level']"
                          @seeList="seeTestList"
                          @continue="onLevelSelect"
                          @cancel="onCancel" />
@@ -50,7 +51,8 @@ with this file. If not, see
         Rooms
       </v-stepper-step>
       <v-stepper-content step="3">
-        <AdvenceSettings revit-cat="Revit Pièces"
+        <AdvenceSettings :model-name="basic.selectedModel"
+                         :revit-cat="['Revit Pièces', 'Revit Rooms']"
                          @seeList="seeTestList"
                          @continue="onRoomSelect"
                          @cancel="onCancel">
@@ -74,7 +76,8 @@ with this file. If not, see
           <small>Optional</small>
         </v-stepper-step>
         <v-stepper-content step="4">
-          <AdvenceSettings revit-cat="Revit Sols"
+          <AdvenceSettings :model-name="basic.selectedModel"
+                           :revit-cat="['Revit Sols', 'Revit Floors']"
                            @seeList="seeTestList"
                            @continue="onFloorSelect"
                            @cancel="onCancel">

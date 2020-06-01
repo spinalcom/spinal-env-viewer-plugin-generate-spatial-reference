@@ -37,11 +37,23 @@ with this file. If not, see
             <v-flex xs12
                     sm6>
               <h4>Attribut name</h4>
-              <v-select v-model="selectKeyFlagType"
+              <md-field>
+                <md-select id="selectKeyFlagType"
+                           v-model="selectKeyFlagTypeComp"
+                           name="selectKeyFlagType"
+                           md-dense>
+                  <md-option v-for="item in items"
+                             :value="item.name">
+                    {{ item.name }}
+                  </md-option>
+                </md-select>
+              </md-field>
+
+              <!-- <v-select v-model="selectKeyFlagType"
                         :items="items"
                         return-object
                         item-text="name"
-                        item-value="value" />
+                        item-value="value" /> -->
               <div>
                 <v-text-field v-model="resultKey"
                               label="Nom" />
@@ -54,11 +66,25 @@ with this file. If not, see
             <v-flex xs12
                     sm6>
               <h4>Attribut value</h4>
-              <v-select v-model="selectValFlagType"
+
+              <md-field>
+                <md-select id="selectValFlagType"
+                           v-model="selectValFlagTypeComp"
+                           name="selectValFlagType"
+                           md-dense>
+                  <md-option v-for="item in items"
+                             :value="item.name">
+                    {{ item.name }}
+                  </md-option>
+                </md-select>
+              </md-field>
+
+              <!-- <v-select v-model="selectValFlagType"
                         :items="items"
                         return-object
                         item-text="name"
-                        item-value="value" />
+                        item-value="value" /> -->
+
               <div>
                 <v-text-field v-model="resultValue"
                               label="Valeur" />
@@ -118,6 +144,30 @@ export default {
     };
   },
   computed: {
+    selectValFlagTypeComp: {
+      get() {
+        return this.selectValFlagType.name;
+      },
+      set(value) {
+        for (const item of this.items) {
+          if (item.name === value) {
+            this.selectValFlagType = item;
+          }
+        }
+      }
+    },
+    selectKeyFlagTypeComp: {
+      get() {
+        return this.selectKeyFlagType.name;
+      },
+      set(value) {
+        for (const item of this.items) {
+          if (item.name === value) {
+            this.selectKeyFlagType = item;
+          }
+        }
+      }
+    },
     haveValFlag() {
       return this.selectValFlagType.value === "r";
     },

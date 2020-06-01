@@ -21,16 +21,29 @@ You should have received a copy of the license along
 with this file. If not, see
 <http://resources.spinalcom.com/licenses.pdf>.
 -->
-
 <template>
   <v-card>
     <v-card-text>
       <slot />
-      <v-select :items="bimfiles"
+      <md-field>
+        <label for="modelselect">Selection of the model that contains the
+          architecture</label>
+        <md-select id="modelselect"
+                   v-model="selectedModel"
+                   name="modelselect"
+                   md-dense>
+          <md-option v-for="bimfile in bimfiles"
+                     :value="bimfile">
+            {{ bimfile }}
+          </md-option>
+        </md-select>
+      </md-field>
+
+      <!-- <v-select :items="bimfiles"
                 attach="#spinalbasicselectcard"
                 label="Selection of the model that contains the architecture"
-                @change="onModelSelected" />
-      <div id="spinalbasicselectcard" />
+                @change="onModelSelected" /> -->
+      <!-- <div id="spinalbasicselectcard" /> -->
       <v-text-field v-model="buildingNameCompu"
                     placeholder="Building Name"
                     label="Building name" />

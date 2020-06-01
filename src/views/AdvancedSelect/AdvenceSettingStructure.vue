@@ -28,11 +28,24 @@ with this file. If not, see
       <!-- <slot />
       <v-checkbox v-model="useCat"
                   :label="`'${revitCat}'`" /> -->
-      <v-select v-model="catLstRes"
+      <!-- <v-select v-model="catLstRes"
                 :items="catLst"
                 multiple
                 box
-                label="Use the Category:" />
+                label="Use the Category:" /> -->
+      <md-field>
+        <label for="catLstRes">Select categories:</label>
+        <md-select id="catLstRes"
+                   v-model="catLstRes"
+                   name="catLstRes"
+                   multiple
+                   md-dense>
+          <md-option v-for="cat in catLst"
+                     :value="cat">
+            {{ cat }}
+          </md-option>
+        </md-select>
+      </md-field>
 
       <v-data-table :headers="headers"
                     :items="items">
@@ -156,7 +169,11 @@ export default {
           "Revit Murs",
           "Revit Portes",
           "Revit Sols",
-          "Revit Fenêtres"
+          "Revit Fenêtres",
+          "Revit Walls",
+          "Revit Floors",
+          "Revit Doors",
+          "Revit Windows"
         ];
         this.catLstRes = this.catLst.filter(item => register.includes(item));
       }
