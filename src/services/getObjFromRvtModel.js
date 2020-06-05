@@ -45,7 +45,8 @@ export function getObjFromRvtModel(model, cfg) {
       pdb.enumAttributes(function (i, attrDef) {
         for (const d of data) {
           if (
-              d.key.test(attrDef.displayName) ||
+            (attrDef.displayName && d.key.test(attrDef.displayName)) ||
+            (!attrDef.displayName && d.key.test(attrDef.name)) ||
               (d.isCat === true && attrDef.category === '__category__' && d.key.test(attrDef.name))
           ) {
             attrToWatch.push({

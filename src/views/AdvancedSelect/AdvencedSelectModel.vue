@@ -33,7 +33,17 @@ with this file. If not, see
       <v-stepper-content step="1">
         <Basicselectmodel :bimfiles="bimfiles"
                           :btn-label="btnLabel"
-                          @continue="onBasicSelect" />
+                          @continue="onBasicSelect">
+          <md-field>
+            <md-select v-model="configName"
+                       md-dense>
+              <md-option v-for="configName in configNames"
+                         :value="configName">
+                {{ configName }}
+              </md-option>
+            </md-select>
+          </md-field>
+        </Basicselectmodel>
       </v-stepper-content>
 
       <v-stepper-step step="2">
@@ -108,10 +118,12 @@ with this file. If not, see
       <v-stepper-content :step="structureStep + 1">
         <v-btn color="red darken-1"
                flat
+               :disabled="btnDisabled"
                @click="onCancel">
           Cancel
         </v-btn>
         <v-btn color="primary"
+               :disabled="btnDisabled"
                @click="onGenerate">
           Generate
         </v-btn>
@@ -149,11 +161,13 @@ export default {
   props: {
     bimfiles: { require: true, type: Array, default: () => [] },
     btnLabel: { type: String, default: () => "Continue" },
-    btnDisabled: { type: Boolean, default: () => false }
+    btnDisabled: { type: Boolean, default: () => false },
+    configNames: { require: true, type: Array, default: () => [] }
   },
   data() {
     return {
       firstname: "test",
+      configName: "default",
       advenced: [],
       e1: 1,
       isRoomRefOK: true,
@@ -200,12 +214,13 @@ export default {
     },
     onGenerate() {
       const cfg = {
+        configName: this.configName,
         basic: this.basic,
         levelSelect: this.createData(this.levelSelect),
         roomSelect: this.createData(this.roomSelect),
         structureSelect: this.createData(this.structureSelect)
       };
-      if (this.isRoomRefOK === true) {
+      if (this.isRoomRefOK === false) {
         Object.assign(cfg, { floorSelect: this.createData(this.floorSelect) });
       }
       if (this.floorRoomNbr) {

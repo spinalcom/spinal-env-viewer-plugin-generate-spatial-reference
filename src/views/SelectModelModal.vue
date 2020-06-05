@@ -58,6 +58,7 @@ with this file. If not, see
           <AdvencedSelectModel v-if="active === 1"
                                :bimfiles="bimfiles"
                                :btn-disabled="spin"
+                               :config-names="configNames"
                                @onGenerate="advancedGenerate" />
         </v-tab-item>
       </v-tabs>
