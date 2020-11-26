@@ -24,17 +24,33 @@
 
 // import { enumMeshTriangles } from './rayUtils/enumMeshTriangles';
 import { RayWorkerManager } from './rayUtils/workerManager';
-import q from "q";
+import {
+  getFragIds,
+  getPointOffset,
+  getModifiedWorldBoundingBox
+} from './ProjectItemService';
 
-function getCenterObjects(array) {
+function getCenterObjects(array, viewer) {
   const res = [];
   for (const obj of array) {
-    for (const dbId of obj.dbId) {
-      let center = getCenter(dbId, obj.model);
+    for (const { dbId, offset } of obj.dbId) {
+      // add offset here
+      let center = getCenter(dbId, offset, obj.model, viewer);
       res.push(center);
     }
   }
   return Promise.all(res);
+}
+async function getCenter(dbId, offset, model, viewer) {
+  let ids = await getFragIds(dbId, model);
+
+  const matrixWorld = viewer.impl.getRenderProxy(model, ids[0]).matrixWorld;
+  const bbox = getModifiedWorldBoundingBox(ids, model);
+
+  return {
+    dbId, modelId: model.id,
+    center: getPointOffset(bbox.center(), offset, matrixWorld)
+  };
 }
 
 
@@ -94,7 +110,7 @@ async function getMeshsData(array, viewer) {
  */
 export async function cast(from, to, viewer) {
   try {
-    const [centerPoints, geometries] = await Promise.all([getCenterObjects(from), getMeshsData(to, viewer)]);
+    const [centerPoints, geometries] = await Promise.all([getCenterObjects(from, viewer), getMeshsData(to, viewer)]);
     console.log("cast", centerPoints, geometries);
 
     const rayWorkerManager = RayWorkerManager.getInstance();
@@ -104,45 +120,6 @@ export async function cast(from, to, viewer) {
     console.error(e);
     throw e;
   }
-}
-
-function getCenter(dbId, model) {
-  let center = new window.THREE.Vector3();
-  return getFragIds(dbId, model)
-    .then(ids => {
-      if (!Array.isArray(ids)) { ids = [ids]; }
-      return getModifiedWorldBoundingBox(ids, model);
-    })
-    .then(bbox => {
-      return {
-        dbId, modelId: model.id,
-        center: bbox.center(center)
-      };
-    });
-}
-
-function getFragIds(dbId, model) {
-  const defer = q.defer();
-  let it = model.getInstanceTree();
-  it.enumNodeFragments(dbId, (res) => {
-    defer.resolve(res);
-  }, false);
-  return defer.promise.timeout(500, `no fragId for ${dbId}`);
-}
-
-function getModifiedWorldBoundingBox(fragIds, model) {
-
-  //fragments list array
-  var fragList = model.getFragmentList();
-  const fragbBox = new window.THREE.Box3();
-  const nodebBox = new window.THREE.Box3();
-
-  fragIds.forEach(function (fragId) {
-    fragList.getWorldBounds(fragId, fragbBox);
-    nodebBox.union(fragbBox);
-  });
-
-  return nodebBox;
 }
 
 // window.testCast = async function () {

@@ -29,7 +29,7 @@ import Vuetify from 'vuetify';
 Vue.use(Vuetify);
 
 import DialogGenerateContext from './src/views/SelectModelModal.vue';
-import AddObjectPanel from "./src/views/AddObjectPanel.vue";
+import ProjectObjectInContext from "./src/views/ProjectObjectInContext/ProjectObjectInContext.vue";
 import { SpinalForgeExtention } from "spinal-env-viewer-panel-manager-service_spinalforgeextention";
 
 import { ButtonGenerateContext } from "./src/buttons/generate";
@@ -74,7 +74,7 @@ SpinalForgeExtention.registerExtention('DialogGenerateContext', SpinalForgeExten
 SpinalForgeExtention.registerExtention('DialogAddObject', SpinalForgeExtention.createExtention({
   name: "DialogAddObject",
   // Vue.extend to create a Compoment constructor
-  vueMountComponent: Vue.extend(AddObjectPanel),
+  vueMountComponent: Vue.extend(ProjectObjectInContext),
   // where to  append the Compoment
   parentContainer: document.body,
 

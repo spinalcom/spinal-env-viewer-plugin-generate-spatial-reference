@@ -22,7 +22,7 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import { GEO_REFERENCE_ROOM_RELATION } from '../constant';
+import { GEO_REFERENCE_ROOM_RELATION } from '../../constant';
 
 // array of {
 //   origin: {dbId: 7934, modelId: 2, center: {…}}
@@ -44,6 +44,7 @@ function getModelByModelId(modelId) {
 }
 
 export async function getEquipmentInfo(intersects, contextId) {
+  console.log("getEquipmentInfo");
   let equipmentInfo = [];
   /* eslint-disable no-await-in-loop */
   for (const spinalIntersections of intersects) {
@@ -56,14 +57,17 @@ export async function getEquipmentInfo(intersects, contextId) {
     const refObj = window.spinal.spinalGraphService.getRealNode(refObjRef.id.get());
 
     const rooms = await refObj.getParents(GEO_REFERENCE_ROOM_RELATION);
-    rooms.filter((room) => {
+    const filteredRooms = rooms.filter((room) => {
+      if (room.contextIds.has(contextId)) {
+        console.log("room", room);
+      }
       return room.contextIds.has(contextId);
     });
 
     equipmentInfo.push({
       bimObjectDbId,
       bimObjectModel,
-      rooms
+      rooms: filteredRooms
     });
   }
   return equipmentInfo;

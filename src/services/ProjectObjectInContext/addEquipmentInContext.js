@@ -26,9 +26,12 @@ import {
   SpinalGraphService, SPINAL_RELATION_TYPE, SPINAL_RELATION_LST_PTR_TYPE, SPINAL_RELATION_PTR_LST_TYPE
 } from "spinal-env-viewer-graph-service";
 import {
+  GEO_REFERENCE_RELATION,
   GEO_EQUIPMENT_RELATION,
-  GEO_ROOM_TYPE
-} from '../constant';
+  GEO_ROOM_TYPE,
+  GEO_FLOOR_TYPE,
+  GEO_FLOOR_RELATION
+} from '../../constant';
 
 import { serviceDocumentation } from 'spinal-env-viewer-plugin-documentation-service';
 import { SpinalAttribute } from 'spinal-models-documentation';
@@ -57,9 +60,9 @@ export async function addEquipmentInContext(equipmentInfo, contextId) {
         SpinalGraphService._addNode(room);
         proms.push(
           addBIMObject(contextId, room.getId().get(),
-            info.bimObjectDbId, bimObj.name, info.bimObjectModel).then((nodeRef)=> {
+            info.bimObjectDbId, bimObj.name, info.bimObjectModel).then((nodeRef) => {
             const nodeBimObject = SpinalGraphService.getRealNode(nodeRef.id.get());
-            return addCategoryAttribute(nodeBimObject,bimObj.properties).then(()=> nodeRef);
+            return addCategoryAttribute(nodeBimObject, bimObj.properties).then(() => nodeRef);
           })
         );
       }
@@ -163,7 +166,23 @@ async function getBimObjectParentRoom(nodeBimObject) {
   });
 }
 
-async function removeBimObjectFromOtherRoom(parentLst, nodeRoom, bimObject) {
+async function getBimObjectParentRefenceObject(nodeBimObject) {
+  const parentPtrLst = nodeBimObject.parents.getElement(GEO_REFERENCE_RELATION);
+  if (!parentPtrLst) return [];
+  const prom = [];
+  for (let idx = 0; idx < parentPtrLst.length; idx++) {
+    prom.push(parentPtrLst[idx].load());
+  }
+  const relationsParent = await Promise.all(prom);
+  const parents = await Promise.all(relationsParent.map(item => item.parent.load()));
+  return parents.filter(item => {
+    const type = item.info.type.get();
+    return type === GEO_FLOOR_TYPE || type === GEO_ROOM_TYPE;
+  });
+}
+
+
+async function removeBimObjectFromOtherRoom (parentLst, nodeRoom, bimObject) {
   let found = false;
   const prom = [];
   for (const parent of parentLst) {
@@ -185,17 +204,48 @@ async function removeBimObjectFromOtherRoom(parentLst, nodeRoom, bimObject) {
   return found;
 }
 
+async function removeBimObjectFromParentRefenceObject(parentLst, nodeRoom, bimObject) {
+  let found = false;
+  const prom = [];
+  for (const parent of parentLst) {
+    if (nodeRoom === parent) { found = true; continue; }
+    if (parent.hasRelation(GEO_FLOOR_RELATION, SPINAL_RELATION_TYPE)) {
+      prom.push(parent.removeChild(bimObject,
+        GEO_FLOOR_RELATION, SPINAL_RELATION_TYPE));
+    }
+    if (parent.hasRelation(GEO_FLOOR_RELATION, SPINAL_RELATION_LST_PTR_TYPE)) {
+      prom.push(parent.removeChild(bimObject,
+        GEO_FLOOR_RELATION, SPINAL_RELATION_LST_PTR_TYPE));
+    }
+    if (parent.hasRelation(GEO_FLOOR_RELATION, SPINAL_RELATION_PTR_LST_TYPE)) {
+      prom.push(parent.removeChild(bimObject,
+        GEO_FLOOR_RELATION, SPINAL_RELATION_PTR_LST_TYPE));
+    }
+  }
+  await Promise.all(prom);
+  return found;
+}
+
 async function addBIMObject(contextId, roomId, dbId, bimObjName, model) {
   try {
     const bimObject = await window.spinal.BimObjectService.getBIMObject(dbId, model);
     if (typeof bimObject !== "undefined") {
       const nodeBimObject = SpinalGraphService.getRealNode(bimObject.id.get());
       const nodeRoom = SpinalGraphService.getRealNode(roomId);
+
+      // rm other room parent
       const parentLst = await getBimObjectParentRoom(nodeBimObject);
       if (parentLst.length > 0) {
-        const found = removeBimObjectFromOtherRoom(parentLst, nodeRoom, nodeBimObject);
+        const found = await removeBimObjectFromOtherRoom(parentLst, nodeRoom, nodeBimObject);
         if (found) return bimObject;
       }
+
+      // rm ref Object parent
+      const parentRefLst = await getBimObjectParentRefenceObject(nodeBimObject);
+      if (parentRefLst.length > 0) {
+        await removeBimObjectFromParentRefenceObject(parentRefLst, nodeRoom, nodeBimObject);
+      }
+
       const context = SpinalGraphService.getRealNode(contextId);
       await nodeRoom.addChildInContext(nodeBimObject, GEO_EQUIPMENT_RELATION,
         SPINAL_RELATION_LST_PTR_TYPE, context);
@@ -214,9 +264,6 @@ async function addBIMObject(contextId, roomId, dbId, bimObjName, model) {
     throw e;
   }
 }
-
-
-
 
 function getProps(dbId, model) {
   return new Promise((resolve, reject) => {

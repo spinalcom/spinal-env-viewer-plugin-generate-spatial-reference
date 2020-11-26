@@ -93,8 +93,8 @@ export default {
 
 <style scoped>
 .spinal-list-model-container {
-  height: calc(100% - 48px);
-  position: relative;
+  /* height: calc(100% - 48px);
+  position: relative; */
 }
 ._tableComponent {
   height: calc(100% - 42px);

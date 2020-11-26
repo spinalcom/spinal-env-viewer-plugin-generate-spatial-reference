@@ -27,7 +27,10 @@ import SpinalSpatialReferential from 'spinal-spatial-referential';
 
 export const GEO_SITE_RELATION = GeographicContext.constants.SITE_RELATION;
 export const GEO_BUILDING_RELATION = SpinalSpatialReferential.constants.GEO_BUILDING_RELATION;
+
+export const GEO_FLOOR_TYPE = SpinalSpatialReferential.constants.FLOOR_TYPE;
 export const GEO_FLOOR_RELATION = SpinalSpatialReferential.constants.GEO_FLOOR_RELATION;
+
 export const GEO_ROOM_RELATION = SpinalSpatialReferential.constants.GEO_ROOM_RELATION;
 export const GEO_ZONE_RELATION = SpinalSpatialReferential.constants.GEO_ZONE_RELATION;
 
