@@ -52,52 +52,92 @@ async function getCenter(dbId, offset, model, viewer) {
     center: getPointOffset(bbox.center(), offset, matrixWorld)
   };
 }
-
+async function getMesh(dbIdItem, model, viewer) {
+  try {
+    let ids = await getFragIds(dbIdItem, model);
+    const meshs = ids.map(fragId => viewer.impl.getRenderProxy(model, fragId));
+    const bbox = getModifiedWorldBoundingBox(ids, model);
+    let center = new window.THREE.Vector3();
+    bbox.center(center);
+    const dataMesh = meshs.map(mesh => {
+      return {
+        geometry: {
+          vb: mesh.geometry.vb,
+          vblayout: mesh.geometry.vblayout,
+          attributes: mesh.geometry.attributes,
+          ib: mesh.geometry.ib,
+          indices: mesh.geometry.indices,
+          index: mesh.geometry.index,
+          offsets: mesh.geometry.offsets,
+          vbstride: mesh.geometry.vbstride
+        },
+        matrixWorld: mesh.matrixWorld,
+        center,
+        bbox: {
+          min: bbox.min,
+          max: bbox.max
+        }
+      };
+    });
+    return {
+      dataMesh,
+      dbId: dbIdItem,
+      modelId: model.id
+    };
+  } catch (e) {
+    console.log("getMeshsData no fragId in", dbIdItem);
+    return null;
+  }
+}
 
 async function getMeshsData(array, viewer) {
   const res = [];
   for (const { model, dbId } of array) {
     for (const dbIdItem of dbId) {
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        let ids = await getFragIds(dbIdItem, model);
-        if (!Array.isArray(ids)) { ids = [ids]; }
-        const meshs = ids.map(fragId => viewer.impl.getRenderProxy(model, fragId));
-        const bbox = getModifiedWorldBoundingBox(ids, model);
-        let center = new window.THREE.Vector3();
-        bbox.center(center);
-        const dataMesh = meshs.map(mesh => {
-          return {
-            geometry: {
-              vb: mesh.geometry.vb,
-              vblayout: mesh.geometry.vblayout,
-              attributes: mesh.geometry.attributes,
-              ib: mesh.geometry.ib,
-              indices: mesh.geometry.indices,
-              index: mesh.geometry.index,
-              offsets: mesh.geometry.offsets,
-              vbstride: mesh.geometry.vbstride
-            },
-            matrixWorld: mesh.matrixWorld,
-            center,
-            bbox: {
-              min: bbox.min,
-              max: bbox.max
-            }
-          };
-        });
-        res.push({
-          dataMesh,
-          dbId: dbIdItem,
-          modelId: model.id
-        });
-      } catch (e) {
-        console.log("getMeshsData no fragId in", dbIdItem);
-        continue;
-      }
+      // try {
+      res.push(getMesh(dbIdItem, model, viewer));
+      // eslint-disable-next-line no-await-in-loop
+      // let ids = await getFragIds(dbIdItem, model);
+      // if (!Array.isArray(ids)) { ids = [ids]; }
+      // const meshs = ids.map(fragId => viewer.impl.getRenderProxy(model, fragId));
+      // const bbox = getModifiedWorldBoundingBox(ids, model);
+      // let center = new window.THREE.Vector3();
+      // bbox.center(center);
+      // const dataMesh = meshs.map(mesh => {
+      //   return {
+      //     geometry: {
+      //       vb: mesh.geometry.vb,
+      //       vblayout: mesh.geometry.vblayout,
+      //       attributes: mesh.geometry.attributes,
+      //       ib: mesh.geometry.ib,
+      //       indices: mesh.geometry.indices,
+      //       index: mesh.geometry.index,
+      //       offsets: mesh.geometry.offsets,
+      //       vbstride: mesh.geometry.vbstride
+      //     },
+      //     matrixWorld: mesh.matrixWorld,
+      //     center,
+      //     bbox: {
+      //       min: bbox.min,
+      //       max: bbox.max
+      //     }
+      //   };
+      // });
+      // res.push({
+      //   dataMesh,
+      //   dbId: dbIdItem,
+      //   modelId: model.id
+      // });
+      // } catch (e) {
+      // console.log("getMeshsData no fragId in", dbIdItem);
+      // continue;
+      // }
     }
   }
-  return res;
+  const tmp = await Promise.all(res);
+  return tmp.filter((item) => {
+    return item != null;
+  });
 }
 
 
