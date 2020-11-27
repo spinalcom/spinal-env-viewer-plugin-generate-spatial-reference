@@ -35,7 +35,7 @@ with this file. If not, see
               justify-center
               align-content-center
               wrap></v-layout> -->
-      <v-btn-toggle v-model="toggleView"
+      <!-- <v-btn-toggle v-model="toggleView"
                     mandatory>
         <v-btn v-tooltip="'Disable preview'"
                :disabled="disabledPreview"
@@ -55,7 +55,7 @@ with this file. If not, see
                @click="$emit('onChangePreview', 2)">
           <v-icon>grain</v-icon>
         </v-btn>
-      </v-btn-toggle>
+      </v-btn-toggle> -->
 
 
 
