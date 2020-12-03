@@ -69,11 +69,17 @@ import BimGroupsList from "./BimGroupsList.vue";
 import AddAGroup from "./AddAGroup.vue";
 import BimGroupsItemEdit from "./BimGroupsItemEdit.vue";
 import {
+  saveProjectionConfig,
+  getProjectionConfig
+} from "../../services/ProjectObjectInContext/saveProjectionConfig";
+
+import {
   addGroup,
   addSelectionToList,
   isProjectionGroupItems,
   getBulkProperties
 } from "../../services/ProjectObjectInContext/ProjectItemService";
+
 export default {
   name: "ProjectObjectInContext",
   components: { BimGroupsItemEdit, Spinner, BimGroupsList, AddAGroup },
@@ -105,11 +111,14 @@ export default {
         const item = this.bimSelected[idx];
         if (isProjectionGroupItems(item)) {
           if (idx === index) {
-            prom.push( item.getAndMergeSelection(this.viewer));
+            prom.push(item.getAndMergeSelection(this.viewer));
           } else {
             for (let select of aggregateSelection) {
               // eslint-disable-next-line no-await-in-loop
-              const props = await getBulkProperties(select.model, select.selection);
+              const props = await getBulkProperties(
+                select.model,
+                select.selection
+              );
               for (const prop of props) {
                 prom.push(item.deleteItem(prop));
               }
@@ -129,7 +138,6 @@ export default {
             //                 toDel.push(item);
             //               }
             //             }
-
           }
         }
       }
@@ -173,7 +181,8 @@ export default {
     async addObjectToContext() {
       this.spin = true;
       try {
-        const {selection, intersects} = await getIntersects(
+        await saveProjectionConfig(this.contextId, this.bimSelected);
+        const { selection, intersects } = await getIntersects(
           this.bimSelected,
           this.contextId
         );
@@ -187,7 +196,6 @@ export default {
         );
         console.log("equipmentInfo res => ", equipmentInfo);
         await addEquipmentInContext(equipmentInfo, this.contextId);
-
       } catch (e) {
         console.error(e);
         throw e;
@@ -215,8 +223,9 @@ export default {
       }
       this.itemToEdit = null;
     },
-    opened(contextId) {
+    async opened(contextId) {
       this.contextId = contextId;
+      this.bimSelected = await getProjectionConfig(contextId);
     },
     removed() {},
     close() {},
