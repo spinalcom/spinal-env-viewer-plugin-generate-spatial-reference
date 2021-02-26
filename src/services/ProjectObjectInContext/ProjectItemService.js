@@ -97,13 +97,13 @@ function addProjectItem(list, prop) {
   }
   if (!found) {
     list.push(
-      new ProjectionItem(prop.name, prop.modelId, prop.dbId, prop.properties)
+      new ProjectionItem(prop.name, prop.modelId, prop.dbId, prop.externalId, prop.properties)
     );
   }
   return Promise.all(promRemove);
 }
 
-export function getBulkProperties(modelId, dbIds, props = { propFilter: ["name"] }) {
+export function getBulkProperties(modelId, dbIds, props = { propFilter: ["name", "externalId"] }) {
   let model = modelId;
   if (typeof modelId === "string") model = getModelByModelId(modelId);
   return new Promise(resolve => {

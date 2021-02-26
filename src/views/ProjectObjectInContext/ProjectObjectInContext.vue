@@ -36,14 +36,6 @@ with this file. If not, see
       <div class="geolocate-bimObj-footer">
         <AddAGroup @addAGroup="addAGroup"
                    @addSelection="addSelection"></AddAGroup>
-
-        <!-- <v-btn dark
-               round
-               :disabled="bimSelected.length == 0"
-               @click="testUniq">
-          Tests Unique
-        </v-btn> -->
-
         <v-btn dark
                round
                :disabled="bimSelected.length == 0"
@@ -261,7 +253,9 @@ export default {
 .geolocate-bimObj-container {
   height: 100%;
 }
-
+.geolocate-bimObj-body .v-btn .v-icon {
+    display: inline-flex;
+}
 /* .geolocate-bimObj-body > .v-menu__content {
   top: 52px !important;
 } */

@@ -34,6 +34,9 @@ import { Lst } from 'spinal-core-connectorjs_type';
 import ProjectionGroupItems from './ProjectionGroupItems';
 import ProjectionItem from './ProjectionItem';
 
+import { getModelByModelId } from './ProjectItemService';
+
+
 async function getConfig(contextId) {
   const context = SpinalGraphService.getRealNode(contextId);
   let configNodes = await context.getChildren(CONFIG_RELATION);
@@ -44,8 +47,38 @@ async function getConfig(contextId) {
   return configNode;
 }
 
+
+function getExternalIdMapping(mapModelExternId, modelId) {
+  const model = getModelByModelId(modelId);
+  if (mapModelExternId.has(model)) return mapModelExternId.get(model);
+  const prom = new Promise((resolve) => {
+    model.getExternalIdMapping((map) => {
+      resolve(map);
+    });
+  });
+  mapModelExternId.set(model, prom);
+  return prom;
+
+}
+
+async function updateProjectionGroupItemsDbId(mapModel, itm, item) {
+  itm.computedData = [];
+  for (let idx = 0; idx < item.computedData.length; idx++) {
+    const element = item.computedData[idx].get();
+    if (element.externalId) {
+      const externalId = element.externalId;
+      // eslint-disable-next-line no-await-in-loop
+      const externalIdMapping = await getExternalIdMapping(mapModel, element.modelId);
+      element.dbId = externalIdMapping[externalId];
+    }
+    itm.computedData.push(element);
+  }
+
+}
+
 export async function getProjectionConfig(contextId) {
   const cfg = await getConfig(contextId);
+  const mapModel = new Map();
   const res = [];
   for (let idx = 0; idx < cfg.length; idx++) {
     const item = cfg[idx];
@@ -56,10 +89,17 @@ export async function getProjectionConfig(contextId) {
       itm.offset = item.offset.get();
       itm.uid = item.uid.get();
       itm.data = item.data.get();
-      itm.computedData = item.computedData.get();
+      // eslint-disable-next-line no-await-in-loop
+      await updateProjectionGroupItemsDbId(mapModel, itm, item);
+      // itm.computedData = item.computedData.get();
     } else {
-      itm = new ProjectionItem(item.name.get(), item.modelId.get(),
-        item.dbId.get(), item.properties.get());
+      try {
+        itm = new ProjectionItem(item.name.get(), item.modelId.get(),
+          item.dbId.get(), item.externalId.get(), item.properties.get());
+      } catch (e) {
+        itm = new ProjectionItem(item.name.get(), item.modelId.get(),
+          item.dbId.get(), null, item.properties.get());
+      }
       itm.name = item.name.get();
       itm.offset = item.offset.get();
       itm.uid = item.uid.get();
@@ -67,6 +107,12 @@ export async function getProjectionConfig(contextId) {
       itm.dbId = item.dbId.get();
       itm.id = item.id.get();
       itm.properties = item.properties.get();
+      if (item.externalId) {
+        itm.externalId = item.externalId.get();
+        // eslint-disable-next-line no-await-in-loop
+        const externalIdMapping = await getExternalIdMapping(mapModel, itm.modelId);
+        itm.dbId = externalIdMapping[itm.externalId];
+      }
     }
     res.push(itm);
   }

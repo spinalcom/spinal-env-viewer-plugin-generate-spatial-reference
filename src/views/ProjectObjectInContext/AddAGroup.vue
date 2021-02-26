@@ -23,25 +23,18 @@ with this file. If not, see
 -->
 
 <template>
-  <v-menu v-model="show"
-          :close-on-content-click="false"
-          :nudge-top="nudgeTop"
-          :nudge-left="375"
-          :origin="'bottom left'"
-          :absolute="true"
-          offset-y>
-    <template v-slot:activator="{ on }">
-      <v-btn color="indigo"
-             dark
-             small
-             fab
-             v-on="on">
-        <v-icon dark>
-          add
-        </v-icon>
-      </v-btn>
-    </template>
-    <v-card>
+  <div>
+    <v-btn color="indigo"
+           dark
+           small
+           fab
+           @click="show = !show">
+      <v-icon dark>
+        add
+      </v-icon>
+    </v-btn>
+    <v-card v-if="show"
+            class="pop-add-group">
       <v-card-title class="headline">
         Add Selection or a Group
       </v-card-title>
@@ -74,7 +67,7 @@ with this file. If not, see
         </v-btn>
       </v-card-actions>
     </v-card>
-  </v-menu>
+  </div>
 </template>
 
 <script>
@@ -115,3 +108,12 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.pop-add-group {
+  position: absolute;
+  bottom: 45px;
+  left: 10px;
+  z-index: 8;
+}
+</style>

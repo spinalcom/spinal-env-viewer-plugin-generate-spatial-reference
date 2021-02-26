@@ -37,19 +37,10 @@ import { ButtonAddObjectToCategory } from "./src/buttons/AddObjectToContext";
 
 export const TOP_BAR_HOOK_NAME = 'GraphManagerTopBar';
 const SIDE_BAR_HOOK_NAME = "GraphManagerSideBar";
+
 //export const mure porte fenetere
 spinalContextMenuService.registerApp(TOP_BAR_HOOK_NAME, new ButtonGenerateContext(), [7]);
 spinalContextMenuService.registerApp(SIDE_BAR_HOOK_NAME, new ButtonAddObjectToCategory(), [7]);
-
-
-// SpinalMountExtention.mount({
-//   // name registered.
-//   name: "DialogGenerateContext",
-//   // Vue.extend to create a Compoment constructor
-//   vueMountComponent: Vue.extend(DialogGenerateContext),
-//   // where to  append the Compoment
-//   parentContainer: document.body
-// });
 
 SpinalForgeExtention.registerExtention('DialogGenerateContext', SpinalForgeExtention.createExtention({
   name: "DialogGenerateContext",

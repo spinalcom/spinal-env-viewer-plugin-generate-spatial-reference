@@ -117,7 +117,7 @@ export default class ProjectionGroupItems {
         new Promise(resolve => {
           model.getBulkProperties(
             Array.from(selection),
-            { propFilter: ["name"] },
+            { propFilter: ["name", "externalId"] },
             result => {
               result.forEach(e => {
                 e.id = `${model.id}-${e.dbId}`;

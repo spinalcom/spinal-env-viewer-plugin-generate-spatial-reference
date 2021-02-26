@@ -64,11 +64,12 @@
 // }
 
 export default class ProjectionItem {
-  constructor(name, modelId, dbId, properties) {
+  constructor(name, modelId, dbId, externalId, properties) {
     this.name = name;
     this.offset = { r: 0, t: 0, z: 0 };
     this.uid = `${Date.now()}-${Math.round(Math.random()*10000)}-${Math.round(Math.random()*10000)}`;
     this.modelId = modelId;
+    this.externalId = externalId;
     this.dbId = dbId;
     this.id = `${modelId}-${dbId}`;
     this.properties = properties;
