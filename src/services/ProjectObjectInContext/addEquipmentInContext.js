@@ -182,7 +182,7 @@ async function getBimObjectParentRefenceObject(nodeBimObject) {
 }
 
 
-async function removeBimObjectFromOtherRoom (parentLst, nodeRoom, bimObject) {
+async function removeBimObjectFromOtherRoom(parentLst, nodeRoom, bimObject) {
   let found = false;
   const prom = [];
   for (const parent of parentLst) {
@@ -271,6 +271,15 @@ function getProps(dbId, model) {
   });
 }
 
+function testWaitForFileSystem(nodes) {
+  for (const node of nodes) {
+    if (node && typeof window.FileSystem._objects[node._server_id] === "undefined") {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * Waits for the nodes to be in the FileSystem.
  * @param {Array<Promise>} promises Array of promises containing the nodes
@@ -285,17 +294,19 @@ async function waitForFileSystem(promises) {
     }
   });
   console.log("waitForFileSystem after promise.all", realNodes);
+  if (testWaitForFileSystem(realNodes)) {
+    console.log("waitForFileSystem RESOLVED");
+    return nodes;
+  }
   return new Promise(resolve => {
+
     let inter = setInterval(() => {
       console.log("in interval");
-      for (const node of realNodes) {
-        if (node && typeof window.FileSystem._objects[node._server_id] === "undefined") {
-          return;
-        }
+      if (testWaitForFileSystem(realNodes)) {
+        console.log("waitForFileSystem RESOLVED");
+        clearInterval(inter);
+        resolve(nodes);
       }
-      console.log("in interval RESOLVED");
-      clearInterval(inter);
-      resolve(nodes);
     }, 500);
   });
 }
