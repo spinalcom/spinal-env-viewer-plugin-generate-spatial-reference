@@ -33,6 +33,7 @@ module.exports = function (self) {
         if (obj.intersections.distance > distance) {
           obj.intersections.distance = distance;
           obj.intersections.dbId = dbId;
+          obj.intersections.modelId = modelId;
         }
         return;
       }
