@@ -78,7 +78,10 @@ with this file. If not, see
 
 <script>
 import BimGroupsItemEditOffset from "./BimGroupsItemEditOffset.vue";
-import { previewItem , stopPreview} from "../../services/ProjectObjectInContext/PreviewCenter";
+import {
+  previewItem,
+  stopPreview
+} from "../../services/ProjectObjectInContext/PreviewCenter";
 
 function itemToEditValidator(item) {
   return (
@@ -127,6 +130,7 @@ export default {
   mounted() {},
   methods: {
     updateOffset(offset) {
+      console.log(offset);
       if (isNaN(offset.r) || isNaN(offset.t) || isNaN(offset.z)) return;
       this.offset.r = offset.r;
       this.offset.t = offset.t;

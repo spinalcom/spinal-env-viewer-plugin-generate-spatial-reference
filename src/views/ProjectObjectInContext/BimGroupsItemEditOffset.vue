@@ -57,8 +57,6 @@ with this file. If not, see
         </v-btn>
       </v-btn-toggle> -->
 
-
-
       <v-btn-toggle v-model="toggleView"
                     mandatory>
         <v-btn v-tooltip="'Disable preview'"
@@ -81,48 +79,22 @@ with this file. If not, see
         </v-btn>
       </v-btn-toggle>
     </v-layout>
-    <v-layout row
-              wrap>
-      <v-flex xs9>
-        <v-slider v-model="_r"
-                  :step="0.1"
-                  :max="50"
-                  :min="-50"
-                  label="R"></v-slider>
-      </v-flex>
-
-      <v-flex xs3>
-        <v-text-field v-model="_r"
-                      class="mt-0"
-                      type="number"></v-text-field>
-      </v-flex>
-
-      <v-flex xs9>
-        <v-slider v-model="_t"
-                  :step="1"
-                  :max="360"
-                  label="T"></v-slider>
-      </v-flex>
-
-      <v-flex xs3>
-        <v-text-field v-model="_t"
-                      class="mt-0"
-                      type="number"></v-text-field>
-      </v-flex>
-
-      <v-flex xs9>
-        <v-slider v-model="_z"
-                  :step="0.1"
-                  :max="50"
-                  :min="-50"
-                  label="Z"></v-slider>
-      </v-flex>
-
-      <v-flex xs3>
-        <v-text-field v-model="_z"
-                      class="mt-0"
-                      type="number"></v-text-field>
-      </v-flex>
+    <v-layout wrap>
+      <BimGroupsItemEditOffsetSlider v-model="_r"
+                                     :step="0.1"
+                                     :max="50"
+                                     :min="0"
+                                     label="R" />
+      <BimGroupsItemEditOffsetSlider v-model="_t"
+                                     :step="1"
+                                     :max="360"
+                                     :min="0"
+                                     label="T" />
+      <BimGroupsItemEditOffsetSlider v-model="_z"
+                                     :step="0.1"
+                                     :max="50"
+                                     :min="-50"
+                                     label="Z" />
     </v-layout>
   </v-container>
 </template>
@@ -137,9 +109,12 @@ function rtzValidator(item) {
 }
 
 import throttle from "lodash.throttle";
-
+import BimGroupsItemEditOffsetSlider from "./BimGroupsItemEditOffsetSlider.vue";
 export default {
   name: "BimGroupsItemEditOffset",
+  components: {
+    BimGroupsItemEditOffsetSlider
+  },
   props: {
     offset: { required: true, type: Object, validator: rtzValidator },
     disabledPreview: { required: true, type: Boolean, default: () => false }

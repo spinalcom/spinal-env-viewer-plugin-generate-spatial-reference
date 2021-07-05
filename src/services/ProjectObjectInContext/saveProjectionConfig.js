@@ -35,7 +35,9 @@ import ProjectionGroupItems from './ProjectionGroupItems';
 import ProjectionItem from './ProjectionItem';
 
 import { getModelByModelId } from './ProjectItemService';
-
+import {
+  getPathDbIds, dbIdsToNames, getPathIdsFromPath
+} from './getPathDbIds';
 
 async function getConfig(contextId) {
   const context = SpinalGraphService.getRealNode(contextId);
@@ -107,7 +109,12 @@ export async function getProjectionConfig(contextId) {
       itm.dbId = item.dbId.get();
       itm.id = item.id.get();
       itm.properties = item.properties.get();
-      if (item.externalId) {
+      if (item.path) {
+        const model = getModelByModelId(itm.modelId);
+        // eslint-disable-next-line no-await-in-loop
+        itm.path = await getPathIdsFromPath(model, item.path.get());
+        itm.dbId = itm.path[itm.path.length - 1];
+      } else if (item.externalId) {
         itm.externalId = item.externalId.get();
         // eslint-disable-next-line no-await-in-loop
         const externalIdMapping = await getExternalIdMapping(mapModel, itm.modelId);
@@ -123,6 +130,13 @@ export async function getProjectionConfig(contextId) {
 export async function saveProjectionConfig(contextId, datas) {
   const config = await getConfig(contextId);
   config.clear();
+
+  await datas.map((data) => {
+    const model = getModelByModelId(data.modelId);
+    getPathDbIds(model, data);
+    return dbIdsToNames(data);
+  });
+
   for (const data of datas) {
     config.push(data);
   }
