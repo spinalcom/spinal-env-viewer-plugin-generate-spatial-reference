@@ -194,7 +194,7 @@ export function getModifiedWorldBoundingBox(fragIds, model) {
   });
   return nodebBox;
 }
-async function getBBoxAndMatrix(dbId, model, viewer) {
+export async function getBBoxAndMatrix(dbId, model, viewer) {
   let ids = await getFragIds(dbId, model);
 
   const matrixWorld = viewer.impl.getRenderProxy(model, ids[0]).matrixWorld;
