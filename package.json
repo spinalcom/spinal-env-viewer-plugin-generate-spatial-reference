@@ -1,6 +1,6 @@
 {
   "name": "spinal-env-viewer-plugin-generate-spatial-reference",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -19,6 +19,7 @@
     "spinal-spatial-referential": "git+https://github.com/spinalcom/spinal-spatial-referential-service.git",
     "vue-virtual-scroller": "^1.0.0-rc.2",
     "vuetify": "^1.5.16",
+    "compress-json": "^2.1.2",
     "webworkify": "^1.5.0"
   },
   "browserify": {

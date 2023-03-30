@@ -23,118 +23,253 @@ with this file. If not, see
 -->
 
 <template>
-  <v-app dark
-         class="gen-spatial-body">
+  <v-app dark class="gen-spatial-body">
     <div class="gen-spatial-container">
-      <v-tabs v-model="active">
-        <v-tab ripple>
-          Basic
-        </v-tab>
-        <v-tab ripple>
-          Advanced
-        </v-tab>
+      <v-tabs v-show="hideDiffSettings" v-model="active">
+        <v-tab ripple> Basic </v-tab>
+        <v-tab ripple> Advanced </v-tab>
+        <v-tab ripple> Scripts </v-tab>
         <v-tab-item class="spinal-modal-gen-spatial-tab-item">
-          <Basicselectmodel v-if="active === 0"
-                            :bimfiles="bimfiles"
-                            :btn-disabled="spin"
-                            @continue="generate">
-            <md-field>
-              <md-select v-model="configName"
-                         md-dense>
-                <md-option v-for="configName in configNames"
-                           :value="configName">
-                  {{ configName }}
-                </md-option>
-              </md-select>
-            </md-field>
-
-            <!-- <v-select v-model="configName"
-                      :items="configNames"
-                      attach="#spinal-modal-gen-spatial-selectconfig" /> -->
-            <!-- <div id="spinal-modal-gen-spatial-selectconfig" /> -->
+          <Basicselectmodel
+            v-if="active === 0"
+            :bimfiles="bimfiles"
+            :btn-disabled="spin"
+            @continue="generate"
+          >
           </Basicselectmodel>
         </v-tab-item>
         <v-tab-item>
-          <AdvencedSelectModel v-if="active === 1"
-                               :bimfiles="bimfiles"
-                               :btn-disabled="spin"
-                               :config-names="configNames"
-                               @onGenerate="advancedGenerate" />
+          <AdvencedSelectModel
+            v-if="active === 1"
+            :bimfiles="bimfiles"
+            :btn-disabled="spin"
+            @onGenerate="advancedGenerate"
+          />
+        </v-tab-item>
+        <v-tab-item>
+          <v-card>
+            <v-card-text>
+              <md-list>
+                <template v-for="(item, index) in scripts">
+                  <template v-if="item.divider">
+                    <md-divider
+                      v-if="index !== 0"
+                      :key="`${item.title}-divider`"
+                    ></md-divider>
+                    <md-subheader :key="item.title">{{
+                      item.title
+                    }}</md-subheader>
+                  </template>
+                  <md-list-item
+                    v-else
+                    :key="item.title"
+                    :disabled="spin"
+                    @click="launchFct(item.fct)"
+                  >
+                    <span class="md-list-item-text">{{ item.title }}</span>
+                  </md-list-item>
+                </template>
+              </md-list>
+            </v-card-text>
+          </v-card>
         </v-tab-item>
       </v-tabs>
-
-      <v-progress-linear v-if="spin"
-                         style="margin:0;"
-                         class="spinal-modal-progress-bar"
-                         :indeterminate="true"
-                         color="primary" />
+      <SpatialDiffSettings
+        v-if="!hideDiffSettings"
+        @back="hideDiffSettings = true"
+        :archiData="archiData"
+        :buildingServerId="buildingServId"
+        :bimFileId="bimFileId"
+      ></SpatialDiffSettings>
+      <md-dialog :md-active.sync="showDialog">
+        <md-dialog-title>Choose which bimFile to update</md-dialog-title>
+        <md-dialog-content>
+          <md-field>
+            <md-select v-model="selectedModelModal" multiple>
+              <md-option
+                v-for="bimFileName in bimfiles"
+                :key="bimFileName"
+                :value="bimFileName"
+                >{{ bimFileName }}</md-option
+              >
+            </md-select>
+          </md-field>
+        </md-dialog-content>
+        <md-dialog-actions>
+          <md-button class="md-primary" @click="showDialog = false"
+            >Close</md-button
+          >
+          <md-button class="md-primary" @click="updateDbIdsConfirm"
+            >confirm</md-button
+          >
+        </md-dialog-actions>
+      </md-dialog>
+      <v-progress-linear
+        v-if="spin"
+        style="margin: 0"
+        class="spinal-modal-progress-bar"
+        :indeterminate="true"
+        color="primary"
+      />
     </div>
   </v-app>
 </template>
 
 <script>
-import { SpinalGraphService } from "spinal-env-viewer-graph-service";
-import * as SM from "spinal-spatial-referential";
-import Basicselectmodel from "./BasicSelectModel.vue";
-import AdvencedSelectModel from "./AdvancedSelect/AdvencedSelectModel.vue";
-import { generateContext } from "../services/generateContext";
+import { SpinalGraphService } from 'spinal-env-viewer-graph-service';
+import Basicselectmodel from './BasicSelectModel.vue';
+import AdvencedSelectModel from './AdvancedSelect/AdvencedSelectModel.vue';
+import SpatialDiffSettings from './diffViewer/SpatialDiffSettings.vue';
+import {
+  getGraph,
+  getArchi,
+  transformArchi,
+  updateDbIds,
+  updateRoomDbId,
+  loadBimFile,
+  setLevelInContextGeo,
+  setAreaInContextGeo,
+  setCenterPosInContextGeo,
+} from 'spinal-spatial-referential';
 export default {
-  name: "DialogGenerateContext",
-  components: { Basicselectmodel, AdvencedSelectModel },
-  data: function() {
+  name: 'DialogGenerateContext',
+  components: { Basicselectmodel, AdvencedSelectModel, SpatialDiffSettings },
+  data: function () {
     return {
       models: [],
-      configNames: [],
-      configName: "default",
-      selectedModel: null,
-      dialog: false,
+      configName: 'default',
       spin: false,
-      model: undefined,
-      buildingName: "",
-      addLevel: false,
-      active: 0
+      active: 0,
+      hideDiffSettings: true,
+      archiData: null,
+      buildingServId: NaN,
+      selectedModel: null,
+      selectedModelModal: null,
+      showDialog: false,
+      scripts: [
+        { divider: true, title: 'Script before update' },
+        { title: 'Update dbids from externalIds', fct: this.updateDbIds },
+        {
+          title: "Update Room's dbid attribute information",
+          fct: this.updateRoomDbId,
+        },
+        { divider: true, title: 'Script after update' },
+        {
+          title: 'Set level attribute in context spatial',
+          fct: this.setLevelInContextGeo,
+        },
+        {
+          title: 'Set area attribute in context spatial',
+          fct: this.setAreaInContextGeo,
+        },
+        {
+          title: 'Set center postion attribute in context spatial',
+          fct: this.setCenterPosInContextGeo,
+        },
+      ],
     };
   },
   computed: {
     bimfiles() {
-      return this.models.map(child => {
+      return this.models.map((child) => {
         return child.info.name.get();
       });
-    }
+    },
+    bimFileId() {
+      const bimFile = this.getBimFile();
+      if (bimFile) return bimFile.info.id.get();
+      return '';
+    },
   },
   async mounted() {
-    this.manager = new SM.default.SpatialManager();
-    let context = SpinalGraphService.getContext("BimFileContext");
+    // this.manager = new SM.default.SpatialManager();
+    let context = SpinalGraphService.getContext('BimFileContext');
     if (!context) return;
-    const spatialConfig = await this.manager.getSpatialConfig();
-    for (let idx = 0; idx < spatialConfig.data.length; idx++) {
-      const config = spatialConfig.data[idx];
-      this.configNames.push(config.configName.get());
-    }
+    // const spatialConfig = await this.manager.getSpatialConfig();
+    // for (let idx = 0; idx < spatialConfig.data.length; idx++) {
+    // const config = spatialConfig.data[idx];
+    // this.configNames.push(config.configName.get());
+    // }
     //Load the children into the graph service
     SpinalGraphService.getChildren(context.info.id.get(), []);
 
-    context.getChildrenInContext(context, []).then(children => {
+    context.getChildrenInContext(context, []).then((children) => {
       for (let i = 0; i < children.length; i++) {
         this.models.push(children[i]);
       }
     });
   },
   methods: {
-    async generate(opt) {
+    updateDbIds() {
+      this.showDialog = true;
+    },
+    async updateDbIdsConfirm() {
+      this.showDialog = false;
       this.spin = true;
-      const spatialConfig = await this.manager.getSpatialConfig();
-      const config = spatialConfig.getConfig(this.configName);
-      config.basic.set(opt);
-      let bimFile;
+      const viewer = window.spinal.SpinalForgeViewer.viewerManager.viewer;
+      try {
+        for (let i = 0; i < this.models.length; i++) {
+          const bimFileNode = this.models[i];
+          if (this.selectedModelModal.includes(bimFileNode.info.name.get())) {
+            const model = await loadBimFile(bimFileNode, viewer);
+            await updateDbIds(bimFileNode.info.id.get(), model);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.spin = false;
+      }
+    },
+
+    updateRoomDbId() {
+      const graph = getGraph();
+      return updateRoomDbId(graph);
+    },
+    setLevelInContextGeo() {
+      const graph = getGraph();
+      return setLevelInContextGeo(graph);
+    },
+    setAreaInContextGeo() {
+      const graph = getGraph();
+      return setAreaInContextGeo(graph);
+    },
+    setCenterPosInContextGeo() {
+      const graph = getGraph();
+      return setCenterPosInContextGeo(graph);
+    },
+    async launchFct(fct) {
+      this.spin = true;
+      try {
+        await fct();
+        console.log('done');
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.spin = false;
+      }
+    },
+    getBimFile() {
       for (let i = 0; i < this.models.length; i++) {
-        if (this.models[i].info.name.get() === opt.selectedModel) {
-          bimFile = this.models[i];
-          break;
+        if (this.models[i].info.name.get() === this.selectedModel) {
+          return this.models[i];
         }
       }
+    },
+    async generate(opt) {
+      this.spin = true;
+      const graph = getGraph();
       try {
-        await generateContext(this.manager, bimFile, config);
+        this.selectedModel = opt.selectedModel;
+        const bimFile = this.getBimFile();
+        const viewer = window.spinal.SpinalForgeViewer.viewerManager.viewer;
+        console.log('start load bimfile');
+        const archi = await getArchi(graph, this.configName, bimFile, viewer);
+        transformArchi(archi);
+        console.log('get Archi Done', archi);
+        this.archiData = archi;
+        this.hideDiffSettings = false;
+        this.buildingServId = opt.buildingServId;
       } catch (e) {
         console.error(e);
       } finally {
@@ -142,7 +277,7 @@ export default {
       }
     },
     async advancedGenerate(cfg) {
-      console.log("cfg", cfg);
+      // console.log('cfg', cfg);
       const spatialConfig = await this.manager.getSpatialConfig();
       spatialConfig.saveConfig(cfg);
       await this.generate(cfg.basic);
@@ -152,8 +287,8 @@ export default {
     },
     removed() {},
     close() {},
-    closeDialog() {}
-  }
+    closeDialog() {},
+  },
 };
 </script>
 

@@ -34,13 +34,15 @@ import { SpinalForgeExtention } from "spinal-env-viewer-panel-manager-service_sp
 
 import { ButtonGenerateContext } from "./src/buttons/generate";
 import { ButtonAddObjectToCategory } from "./src/buttons/AddObjectToContext";
-
+import { GenerateContextGeo } from "./src/buttons/RunGeneration";
+import "./src/views/diffViewer/index";
+import "./src/views/CmdRunViewer/index";
 export const TOP_BAR_HOOK_NAME = 'GraphManagerTopBar';
 const SIDE_BAR_HOOK_NAME = "GraphManagerSideBar";
 //export const mure porte fenetere
 spinalContextMenuService.registerApp(TOP_BAR_HOOK_NAME, new ButtonGenerateContext(), [7]);
 spinalContextMenuService.registerApp(SIDE_BAR_HOOK_NAME, new ButtonAddObjectToCategory(), [7]);
-
+spinalContextMenuService.registerApp(SIDE_BAR_HOOK_NAME, new GenerateContextGeo(), [7]);
 
 // SpinalMountExtention.mount({
 //   // name registered.
