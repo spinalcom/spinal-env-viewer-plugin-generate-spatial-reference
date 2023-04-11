@@ -116,7 +116,6 @@ with this file. If not, see
 </template>
 
 <script>
-import { SpinalGraphService } from 'spinal-env-viewer-graph-service';
 import Basicselectmodel from './BasicSelectModel.vue';
 import AdvencedSelectModel from './AdvancedSelect/AdvencedSelectModel.vue';
 import SpatialDiffSettings from './diffViewer/SpatialDiffSettings.vue';
@@ -130,6 +129,7 @@ import {
   setLevelInContextGeo,
   setAreaInContextGeo,
   setCenterPosInContextGeo,
+  addNodeGraphService,
 } from 'spinal-spatial-referential';
 export default {
   name: 'DialogGenerateContext',
@@ -183,21 +183,17 @@ export default {
   },
   async mounted() {
     // this.manager = new SM.default.SpatialManager();
-    let context = SpinalGraphService.getContext('BimFileContext');
-    if (!context) return;
-    // const spatialConfig = await this.manager.getSpatialConfig();
-    // for (let idx = 0; idx < spatialConfig.data.length; idx++) {
-    // const config = spatialConfig.data[idx];
-    // this.configNames.push(config.configName.get());
-    // }
-    //Load the children into the graph service
-    SpinalGraphService.getChildren(context.info.id.get(), []);
+    const graph = getGraph();
 
-    context.getChildrenInContext(context, []).then((children) => {
-      for (let i = 0; i < children.length; i++) {
-        this.models.push(children[i]);
-      }
-    });
+    let context = await graph.getContext('BimFileContext');
+    if (!context) return;
+    addNodeGraphService(context);
+
+    const children = await context.getChildrenInContext(context);
+    for (const child of children) {
+      addNodeGraphService(child);
+      this.models.push(child);
+    }
   },
   methods: {
     updateDbIds() {

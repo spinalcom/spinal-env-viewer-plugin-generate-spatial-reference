@@ -220,8 +220,7 @@ with this file. If not, see
 </template>
 
 <script>
-import { EModificationType } from 'spinal-spatial-referential';
-import { SpinalGraphService } from 'spinal-env-viewer-graph-service';
+import { EModificationType, getGraph } from 'spinal-spatial-referential';
 import {
   diffFloorWithContextGeo,
   getContextSpatial,
@@ -325,7 +324,7 @@ export default {
       this.modeView = 'floor';
       this.roomData = null;
       this.FAData = FAData;
-      const graph = SpinalGraphService.getGraph();
+      const graph = getGraph();
       const contextGeo = await getContextSpatial(graph);
       this.manualAssingmentSelection = 0;
       this.manualAssingmentSelectionTmp = 0;
@@ -425,7 +424,7 @@ export default {
       return props;
     },
     async onSelectRoomSetAssing(FAData, RADataProperties) {
-      const graph = SpinalGraphService.getGraph();
+      const graph = getGraph();
       const contextGeo = await getContextSpatial(graph);
       this.manualAssingmentSelection = 0;
       this.manualAssingmentSelectionTmp = 0;
@@ -468,7 +467,7 @@ export default {
       if (!this.buildingServerId) return;
       this.modeView = '';
       this.roomData = null;
-      const graph = SpinalGraphService.getGraph();
+      const graph = getGraph();
       const contextGeo = await getContextSpatial(graph);
       const archiData = [];
       for (const extId in this.archiData) {

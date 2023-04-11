@@ -196,7 +196,7 @@ with this file. If not, see
 <script>
 import { EModificationType } from 'spinal-spatial-referential';
 import { FileSystem } from 'spinal-core-connectorjs';
-import { SpinalNode } from 'spinal-env-viewer-graph-service';
+import { SpinalNode } from 'spinal-model-graph';
 import { eventBus } from './eventbus';
 
 export default {

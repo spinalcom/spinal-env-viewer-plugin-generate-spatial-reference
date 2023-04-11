@@ -22,22 +22,16 @@
  * <http://resources.spinalcom.com/licenses.pdf>.
  */
 
-import GeographicContext from 'spinal-env-viewer-context-geographic-service';
-import SpinalSpatialReferential from 'spinal-spatial-referential';
-
-export const GEO_SITE_RELATION = GeographicContext.constants.SITE_RELATION;
-export const GEO_BUILDING_RELATION = SpinalSpatialReferential.constants.GEO_BUILDING_RELATION;
-
-export const GEO_FLOOR_TYPE = SpinalSpatialReferential.constants.FLOOR_TYPE;
-export const GEO_FLOOR_RELATION = SpinalSpatialReferential.constants.GEO_FLOOR_RELATION;
-
-export const GEO_ROOM_RELATION = SpinalSpatialReferential.constants.GEO_ROOM_RELATION;
-export const GEO_ZONE_RELATION = SpinalSpatialReferential.constants.GEO_ZONE_RELATION;
-
-export const GEO_EQUIPMENT_RELATION = GeographicContext.constants.EQUIPMENT_RELATION;
-
-export const GEO_REFERENCE_RELATION = SpinalSpatialReferential.constants.GEO_REFERENCE_RELATION;
-export const GEO_REFERENCE_ROOM_RELATION = SpinalSpatialReferential.constants.GEO_REFERENCE_ROOM_RELATION;
-
-export const GEO_ROOM_TYPE = GeographicContext.constants.ROOM_TYPE;
-export const GEO_EQUIPMENT_TYPE = GeographicContext.constants.EQUIPMENT_TYPE;
+export {
+  GEO_SITE_RELATION,
+  GEO_BUILDING_RELATION,
+  GEO_FLOOR_TYPE,
+  GEO_FLOOR_RELATION,
+  GEO_ROOM_RELATION,
+  GEO_ZONE_RELATION,
+  GEO_EQUIPMENT_RELATION,
+  GEO_REFERENCE_RELATION,
+  GEO_REFERENCE_ROOM_RELATION,
+  GEO_ROOM_TYPE,
+  GEO_EQUIPMENT_TYPE
+} from "spinal-spatial-referential";

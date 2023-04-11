@@ -29,7 +29,7 @@ import Vuetify from 'vuetify';
 Vue.use(Vuetify);
 
 import DialogGenerateContext from './src/views/SelectModelModal.vue';
-import ProjectObjectInContext from "./src/views/ProjectObjectInContext/ProjectObjectInContext.vue";
+import ProjectObjectInContext from "./src/views/ProjectBimObj/ProjectObjectInContext.vue";
 import { SpinalForgeExtention } from "spinal-env-viewer-panel-manager-service_spinalforgeextention";
 
 import { ButtonGenerateContext } from "./src/buttons/generate";

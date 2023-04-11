@@ -92,8 +92,7 @@ with this file. If not, see
 </template>
 
 <script>
-import { SpinalGraphService } from 'spinal-env-viewer-graph-service';
-import { getContextSpatial } from 'spinal-spatial-referential';
+import { getContextSpatial, getGraph } from 'spinal-spatial-referential';
 import geoService from 'spinal-env-viewer-context-geographic-service';
 
 export default {
@@ -131,7 +130,7 @@ export default {
       this.selectedModel = value;
     },
     async getBuildings() {
-      const graph = SpinalGraphService.getGraph();
+      const graph = getGraph();
       const contextGeo = await getContextSpatial(graph);
       const buildings = await contextGeo.getChildrenInContext(contextGeo);
       this.buildings = buildings.map((itm) => {
@@ -144,7 +143,7 @@ export default {
         this.buildingSelectedValue = this.buildings[0].value;
     },
     async onAcceptNewBuilding(buildingName) {
-      const graph = SpinalGraphService.getGraph();
+      const graph = getGraph();
       const contextGeo = await getContextSpatial(graph);
       await geoService.addBuilding(
         contextGeo.info.id.get(),
