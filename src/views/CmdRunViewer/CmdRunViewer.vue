@@ -113,12 +113,10 @@ const CmdRunViewer = {
       try {
         this.status = 1;
         console.log('dataCmdRes', this.dataCmd);
-        await handleCmd(this.dataCmd, 'test1', this.progress);
-        // await handleCmd(this.dataCmd, this.node.info.name.get(), this.progress);
+        await handleCmd(this.dataCmd, this.node.info.name.get(), this.progress);
         this.status = 2;
         console.log('doing 2nd pass');
-        await handleCmd(this.dataCmd, 'test1', this.progress);
-        // await handleCmd(this.dataCmd, this.node.info.name.get(), this.progress);
+        await handleCmd(this.dataCmd, this.node.info.name.get(), this.progress);
         this.status = 3;
         // edit node status ???
       } catch (error) {
