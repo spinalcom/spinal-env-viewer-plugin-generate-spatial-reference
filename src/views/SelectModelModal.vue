@@ -130,6 +130,8 @@ import {
   setAreaInContextGeo,
   setCenterPosInContextGeo,
   addNodeGraphService,
+  getViewer,
+  loadConfig,
 } from 'spinal-spatial-referential';
 export default {
   name: 'DialogGenerateContext',
@@ -202,7 +204,7 @@ export default {
     async updateDbIdsConfirm() {
       this.showDialog = false;
       this.spin = true;
-      const viewer = window.spinal.SpinalForgeViewer.viewerManager.viewer;
+      const viewer = getViewer();
       try {
         for (let i = 0; i < this.models.length; i++) {
           const bimFileNode = this.models[i];
@@ -258,7 +260,7 @@ export default {
       try {
         this.selectedModel = opt.selectedModel;
         const bimFile = this.getBimFile();
-        const viewer = window.spinal.SpinalForgeViewer.viewerManager.viewer;
+        const viewer = getViewer();
         console.log('start load bimfile');
         const archi = await getArchi(graph, this.configName, bimFile, viewer);
         transformArchi(archi);
@@ -274,7 +276,8 @@ export default {
     },
     async advancedGenerate(cfg) {
       // console.log('cfg', cfg);
-      const spatialConfig = await this.manager.getSpatialConfig();
+      const graph = getGraph();
+      const spatialConfig = await loadConfig(graph);
       spatialConfig.saveConfig(cfg);
       await this.generate(cfg.basic);
     },

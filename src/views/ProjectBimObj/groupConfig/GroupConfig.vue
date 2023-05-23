@@ -27,7 +27,13 @@ with this file. If not, see
     <v-toolbar class="geolocate-groupe-config-header" color="black" dark dense>
       <v-spacer></v-spacer>
       <AddAGroupConfig @addAGroupConfig="addAGroupConfig"></AddAGroupConfig>
-      <v-btn icon round @click="$emit('save')" color="warning">
+      <v-btn
+        icon
+        round
+        @click="$emit('save')"
+        color="warning"
+        :disabled="canSave"
+      >
         <v-icon>save</v-icon>
       </v-btn>
       <v-btn
@@ -65,15 +71,28 @@ with this file. If not, see
               </div>
               <GroupeConfigItemBtn
                 :uid="groupConfig.uid"
-                @deleteGroup="deleteGroup"
-                @showInViewer="showInViewer"
-                @showEdit="showEdit"
+                @deleteGroup="itemDelete = groupConfig"
+                @showEdit="itmEdit = groupConfig"
               ></GroupeConfigItemBtn>
+              <v-progress-linear
+                class="geolocate-groupe-config-card-item-progressbar"
+                v-if="groupConfig.progress != 100"
+                v-model="groupConfig.progress"
+              ></v-progress-linear>
             </md-list-item>
           </md-list>
         </div>
       </md-card>
     </div>
+    <md-dialog-confirm
+      v-if="itemDelete"
+      :md-active.sync="showConfirmDelete"
+      md-title="Confirm delete"
+      md-confirm-text="Confirm"
+      md-cancel-text="Cancel"
+      @md-cancel="showConfirmDelete = false"
+      @md-confirm="deleteGroup"
+    />
     <md-dialog-prompt
       v-if="itmEdit"
       :md-active.sync="showEditPrompt"
@@ -82,6 +101,7 @@ with this file. If not, see
       md-input-maxlength="30"
       md-input-placeholder="name..."
       md-confirm-text="Edit"
+      @md-confirm="$emit('savableCfg')"
     />
   </div>
 </template>
@@ -93,9 +113,9 @@ import GroupeConfigItemBtn from './GroupeConfigItemBtn.vue';
 export default {
   name: 'GroupeConfig',
   components: { AddAGroupConfig, GroupeConfigItemBtn },
-  props: ['groupConfigs'],
+  props: ['groupConfigs', 'canSave'],
   data() {
-    return { show: true, selected: [], itmEdit: null };
+    return { show: true, selected: [], itmEdit: null, itemDelete: null };
   },
   computed: {
     showEditPrompt: {
@@ -104,7 +124,14 @@ export default {
       },
       set(value) {
         if (value === false) this.itmEdit = null;
-        //  !!itmEdit;
+      },
+    },
+    showConfirmDelete: {
+      get() {
+        return !!this.itemDelete;
+      },
+      set(value) {
+        if (value === false) this.itemDelete = null;
       },
     },
   },
@@ -116,17 +143,10 @@ export default {
       this.$emit('addAGroupConfig', target);
     },
     generate() {
-      this.$emit('generate', selected);
+      this.$emit('generate', this.selected);
     },
     deleteGroup(uid) {
-      this.$emit('deleteGroup', uid);
-    },
-    showInViewer(uid) {
-      this.$emit('showInViewer', uid);
-    },
-    showEdit(uid) {
-      const itm = this.groupConfigs.find((itm) => itm.uid === uid);
-      this.itmEdit = itm;
+      this.$emit('deleteGroup', this.itemDelete.uid);
     },
   },
 };
@@ -153,5 +173,11 @@ export default {
 }
 .geolocate-groupe-config-card-item-checkbox:first-child {
   margin-right: 16px;
+}
+.geolocate-groupe-config-card-item-progressbar {
+  z-index: 1;
+  position: absolute;
+  bottom: 0;
+  margin: 0;
 }
 </style>

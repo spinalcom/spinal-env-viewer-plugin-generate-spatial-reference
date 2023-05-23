@@ -92,7 +92,11 @@ with this file. If not, see
 </template>
 
 <script>
-import { getContextSpatial, getGraph } from 'spinal-spatial-referential';
+import {
+  getContextSpatial,
+  getGraph,
+  waitGetServerId,
+} from 'spinal-spatial-referential';
 import geoService from 'spinal-env-viewer-context-geographic-service';
 
 export default {
@@ -145,11 +149,12 @@ export default {
     async onAcceptNewBuilding(buildingName) {
       const graph = getGraph();
       const contextGeo = await getContextSpatial(graph);
-      await geoService.addBuilding(
+      const node = await geoService.addBuilding(
         contextGeo.info.id.get(),
         contextGeo.info.id.get(),
         buildingName
       );
+      await waitGetServerId(node);
       return this.getBuildings();
     },
     onContinue() {

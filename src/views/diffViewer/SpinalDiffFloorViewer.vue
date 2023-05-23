@@ -269,7 +269,7 @@ export default {
       if (!diffInfo) return '';
       const tmp = [];
       if (diffInfo.diffAttr.length > 0) {
-        tmp.push(`${diffInfo.diffAttr.length} attr(s)`);
+        tmp.push(`${diffInfo.diffAttr.length} attribute(s)`);
       }
       if (diffInfo.diffInfo.length > 0) {
         tmp.push(`${diffInfo.diffInfo.length} nodeinfo(s)`);
@@ -281,7 +281,7 @@ export default {
       if (FAData.diff) {
         const tmp = [];
         if (FAData.diff.diffRoom.delRooms.length > 0) {
-          tmp.push(`${FAData.diff.diffRoom.delRooms.length} Del`);
+          tmp.push(`${FAData.diff.diffRoom.delRooms.length} Delete`);
         }
         if (FAData.diff.diffRoom.newRooms.length > 0) {
           tmp.push(`${FAData.diff.diffRoom.newRooms.length} New`);
@@ -298,13 +298,13 @@ export default {
       if (FAData.diff) {
         const tmp = [];
         if (FAData.diff.diffRef.delBimObj.length > 0) {
-          tmp.push(`${FAData.diff.diffRef.delBimObj.length} Del`);
+          tmp.push(`${FAData.diff.diffRef.delBimObj.length} Delete`);
         }
         if (FAData.diff.diffRef.newBimObj.length > 0) {
           tmp.push(`${FAData.diff.diffRef.newBimObj.length} New`);
         }
         if (tmp.length === 0) return '';
-        return 'Structure Ref: ' + tmp.join(', ');
+        return 'Structure reference: ' + tmp.join(', ');
       }
       return '';
     },

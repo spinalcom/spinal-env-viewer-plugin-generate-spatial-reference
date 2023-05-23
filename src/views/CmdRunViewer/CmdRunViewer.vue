@@ -30,15 +30,16 @@ with this file. If not, see
     <md-dialog-title>Command Run</md-dialog-title>
     <md-dialog-content>
       <p>status: {{ getStatus() }}</p>
-      <div>
-        <md-progress-bar
-          class="command-run-progress-bar"
-          v-for="(cmds, index) in dataCmd"
-          :key="index"
-          md-mode="determinate"
-          :md-value="getProgress(cmds, index)"
-        ></md-progress-bar>
-      </div>
+      <CmdRunViewerGeo
+        v-show="this.mode === GENERATION_GEO_TYPE"
+        ref="CmdRunViewerGeo"
+        @status="status = $event.target"
+      ></CmdRunViewerGeo>
+      <CmdRunViewerProjection
+        ref="CmdRunViewerProjection"
+        v-show="this.mode === GENERATION_PROJECTION_TYPE"
+        @status="status = $event.target"
+      ></CmdRunViewerProjection>
     </md-dialog-content>
     <md-dialog-actions>
       <md-button
@@ -56,71 +57,68 @@ with this file. If not, see
 
 <script>
 import {
-  getCmdServId,
-  decode,
-  handleCmd,
   getRealNode,
+  GENERATION_GEO_TYPE,
+  GENERATION_PROJECTION_TYPE,
 } from 'spinal-spatial-referential';
-import Axios from 'axios';
-
+import CmdRunViewerGeo from './CmdRunViewerGeo.vue';
+import CmdRunViewerProjection from './CmdRunViewerProjection.vue';
 const CmdRunViewer = {
   name: 'CmdRunViewer',
   props: ['onFinised'],
+  components: { CmdRunViewerGeo, CmdRunViewerProjection },
   data() {
     return {
+      GENERATION_GEO_TYPE,
+      GENERATION_PROJECTION_TYPE,
       showDialog: true,
-      dataCmd: [],
       loading: false,
-      indexCmd: 0,
-      totalCmd: 0,
-      idxInCmd: 0,
-      totalInCmd: 0,
+      mode: '',
       status: 0,
     };
   },
   methods: {
     async opened(option) {
-      this.showDialog = true;
-      this.indexCmd = 0;
-      this.totalCmd = 0;
-      this.idxInCmd = 0;
-      this.totalInCmd = 0;
-      this.status = 0;
       if (option) {
+        this.showDialog = true;
+        this.status = 0;
+        let node;
         if (option.selectedNodeId) {
-          this.loading = true;
-          try {
-            this.node = getRealNode(option.selectedNodeId);
-            const servId = getCmdServId(this.node);
-            const getData = await Axios.get(`/sceen/_?u=${servId}`, {
-              responseType: 'blob',
-            });
-            const arrayBuffer = await getData.data.arrayBuffer();
-            this.dataCmd = decode(arrayBuffer);
-          } catch (error) {
-            console.error(error);
-          } finally {
-            this.loading = false;
-          }
+          node = getRealNode(option.selectedNodeId);
         } else {
-          this.dataCmd = option.dataCmd;
-          this.node = option.node;
+          node = option.node;
         }
-      }
+        this.mode = node.info.generationType.get();
+        try {
+          this.loading = true;
+          if (this.mode === GENERATION_GEO_TYPE) {
+            await this.$refs.CmdRunViewerGeo.setUp(node, option.contextId);
+          } else if (this.mode === GENERATION_PROJECTION_TYPE) {
+            await this.$refs.CmdRunViewerProjection.setUp(
+              node,
+              option.contextId
+            );
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          this.loading = false;
+        }
+      } else console.error('CmdRunViewer opened without an option');
     },
     async start() {
       this.loading = true;
       try {
-        this.status = 1;
-        console.log('dataCmdRes', this.dataCmd);
-        await handleCmd(this.dataCmd, this.node.info.name.get(), this.progress);
-        this.status = 2;
-        console.log('doing 2nd pass');
-        await handleCmd(this.dataCmd, this.node.info.name.get(), this.progress);
-        this.status = 3;
-        // edit node status ???
+        if (this.mode === GENERATION_GEO_TYPE) {
+          await this.$refs.CmdRunViewerGeo.start.call(
+            this.$refs.CmdRunViewerGeo
+          );
+        } else if (this.mode === GENERATION_PROJECTION_TYPE) {
+          await this.$refs.CmdRunViewerProjection.start.call(
+            this.$refs.CmdRunViewerProjection
+          );
+        }
       } catch (error) {
-        this.status = 4;
         console.error(error);
       } finally {
         this.loading = false;
@@ -141,41 +139,14 @@ const CmdRunViewer = {
           return 'stand by';
       }
     },
-    progress(indexCmd, idxInCmd) {
-      this.indexCmd = indexCmd;
-      this.idxInCmd = idxInCmd;
-      console.log(
-        `${indexCmd + 1}/${this.dataCmd.length} => ${idxInCmd}/${
-          this.dataCmd[indexCmd].length
-        }`
-      );
-    },
     removed(option) {
       this.showDialog = false;
     },
     closeDialog(closeResult) {
       if (typeof this.onFinised === 'function') this.onFinised();
     },
-    getProgress(cmds, index) {
-      if (this.status === 3) return 100;
-      if (this.status === 1 || this.status === 2) {
-        if (this.indexCmd < index) return 0;
-        if (this.indexCmd > index) return 100;
-        console.log(this.idxInCmd / cmds.length);
-        return (this.idxInCmd / cmds.length) * 100;
-      }
-      return 0;
-    },
   },
 };
 
 export default CmdRunViewer;
 </script>
-
-<style scoped>
-.command-run-progress-bar {
-  margin: 2px 0;
-}
-</style>
-
-<style></style>

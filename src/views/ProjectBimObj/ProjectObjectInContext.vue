@@ -26,28 +26,53 @@ with this file. If not, see
   <v-app dark class="geolocate-bimObj-body">
     <div class="geolocate-bimObj-container">
       <GroupeConfig
-        v-if="selectedGroup === null"
+        v-if="selectedGroup === undefined"
         :groupConfigs="groupConfigs"
+        :can-save="cleanCfg"
         @addAGroupConfig="addAGroupConfig"
         @selectGroup="onselectedGroup"
         @generate="generate"
+        @save="onSave"
+        @savableCfg="cleanCfg = false"
         @deleteGroup="deleteGroup"
-        @showInViewer="showInViewer"
       ></GroupeConfig>
       <SelectedGroup
         v-else
-        @back="selectedGroup = null"
-        :selectedGroup="selectedGroup"
+        :name="selectedGroup.name"
+        :uid="selectedGroup.uid"
+        :list="selectedGroup.data"
+        :can-save="cleanCfg"
+        @save="onSave"
+        @savableCfg="cleanCfg = false"
+        @back="selectedGroup = undefined"
         @generate="generate"
       ></SelectedGroup>
+      <v-progress-linear
+        class="geolocate-bimObj-progressbar"
+        v-if="progress != 100"
+        v-model="progress"
+      ></v-progress-linear>
     </div>
   </v-app>
 </template>
 
 <script>
-import { ProjectionGroupeConfig } from 'spinal-spatial-referential';
-import GroupeConfig from './GroupConfig.vue';
-import SelectedGroup from './SelectedGroup.vue';
+import {
+  ProjectionGroupConfig,
+  getProjectionConfig,
+  getRealNode,
+  removeConfigFromContext,
+  createConfigNode,
+  getIntersects,
+  mergeIntersectRes,
+  createCmdNotFound,
+  createCmdProjection,
+  saveCmdsProjectionGeo,
+  addNodeGraphService,
+  waitPathSendToHub,
+} from 'spinal-spatial-referential';
+import GroupeConfig from './groupConfig/GroupConfig.vue';
+import SelectedGroup from './SelectedGroup/SelectedGroup.vue';
 
 export default {
   name: 'ProjectObjectInContext',
@@ -56,30 +81,119 @@ export default {
     return {
       contextId: '',
       groupConfigs: [],
-      selectedGroup: null,
+      selectedGroup: undefined,
+      cleanCfg: true,
+      progress: 100,
     };
   },
   mounted() {},
   methods: {
     addAGroupConfig(groupName) {
-      this.groupConfigs.push(new ProjectionGroupeConfig(groupName));
+      const cfgGroup = new ProjectionGroupConfig(groupName);
+      this.groupConfigs.push(cfgGroup);
+      const context = getRealNode(this.contextId);
+      return createConfigNode(context, cfgGroup);
     },
     onselectedGroup(select) {
       this.selectedGroup = select;
     },
-    generate() {
-      console.log('generate', arguments);
+    async onSave() {
+      try {
+        const context = getRealNode(this.contextId);
+        this.progress = 0;
+        for (let idx = 0; idx < this.groupConfigs.length; idx++) {
+          const group = this.groupConfigs[idx];
+          await group.saveToContext(context);
+          this.progress = (this.groupConfigs.length / (idx + 1)) * 100;
+        }
+        this.cleanCfg = true;
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.progress = 100;
+      }
+    },
+    getConfigByUid(configUidToGen) {
+      for (const cfg of this.groupConfigs) {
+        if (cfg.uid === configUidToGen) return cfg;
+      }
+    },
+    async generate(configUidToGens) {
+      await this.onSave();
+      const context = getRealNode(this.contextId);
+      this.progress = 0;
+      try {
+        const intersectRes = {
+          selection: [],
+          intersects: [],
+        };
+        for (let idx = 0; idx < configUidToGens.length; idx++) {
+          const configToGen = this.getConfigByUid(configUidToGens[idx]);
+          if (!configToGen) {
+            console.error(
+              `${configUidToGens[idx]} skipped no config found with this uid`
+            );
+            continue;
+          }
+          const intersectResTmp = await getIntersects(configToGen, context);
+          // merge intersectRes
+          mergeIntersectRes(intersectRes, intersectResTmp);
+          this.progress = (configUidToGens.length / (idx + 1)) * 66;
+          console.log(
+            'raycasting %d% => %d/%d',
+            (configUidToGens.length / (idx + 1)) * 100,
+            idx + 1,
+            configUidToGens.length
+          );
+        }
+        console.log('raycasting', intersectRes);
+        const cmdNotFounds = await createCmdNotFound(intersectRes);
+        console.log('cmdNotFounds', cmdNotFounds);
+        this.progress = 80;
+        const cmdProject = await createCmdProjection(
+          intersectRes.intersects,
+          this.contextId
+        );
+        console.log('cmdProject', cmdProject);
+        this.progress = 90;
+        const cmd = cmdNotFounds.concat(cmdProject);
+        const {
+          node,
+          context: contextCmd,
+          data,
+        } = await saveCmdsProjectionGeo(cmd);
+        addNodeGraphService(node);
+        await waitPathSendToHub(data);
+        console.log('done', cmd);
+        spinal.spinalPanelManagerService.openPanel('CmdRunViewer', {
+          dataCmd: cmd,
+          node,
+          contextId: contextCmd.info.id.get(),
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.progress = 100;
+      }
     },
     deleteGroup(uid) {
       const index = this.groupConfigs.findIndex((itm) => itm.uid === uid);
-      if (index !== -1) this.groupConfigs.splice(index, 1);
+      if (index !== -1) {
+        const itm = this.groupConfigs[index];
+        this.groupConfigs.splice(index, 1);
+        const context = getRealNode(this.contextId);
+        return removeConfigFromContext(context, itm.uid);
+      }
     },
-    showInViewer(uid) {
-      const itm = this.groupConfigs.find((itm) => itm.uid === uid);
-      console.log('showInViewer', itm);
+    async getConfig() {
+      this.progress = 0;
+      const context = getRealNode(this.contextId);
+      this.groupConfigs = await getProjectionConfig(context);
+      this.progress = 100;
     },
     async opened(contextId) {
       this.contextId = contextId;
+      return this.getConfig();
     },
     removed() {},
     close() {},
@@ -95,6 +209,12 @@ export default {
 }
 .geolocate-bimObj-container {
   height: 100%;
+}
+.geolocate-bimObj-progressbar {
+  z-index: 1;
+  position: absolute;
+  bottom: 0;
+  margin: 0;
 }
 </style>
 

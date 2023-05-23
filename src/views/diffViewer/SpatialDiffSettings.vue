@@ -509,6 +509,7 @@ export default {
   position: relative;
   overflow: auto;
   height: calc(100% - 50px);
+  user-select: text;
 }
 .spinal-md-select {
   align-items: flex-end;

@@ -39,7 +39,7 @@ export function getObjFromRvtModel(model, cfg) {
   data.push(']');
   const fct = `
     function userFunction(pdb) {
-      const data = ${ data.join("")}
+      const data = ${data.join("")}
       const attrToWatch = [];
       const result = [];
       pdb.enumAttributes(function (i, attrDef) {

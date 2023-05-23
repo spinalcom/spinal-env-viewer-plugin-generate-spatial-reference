@@ -48,7 +48,7 @@ with this file. If not, see
           <v-icon>done</v-icon>
         </v-btn>
       </v-toolbar>
-      <v-card>
+      <v-card class="bim-groups-item-edit-container spinal-scrollbar">
         <v-card-text>
           <div class="bim-groups-edit-name">
             <v-text-field v-model="name" label="Name"></v-text-field>
@@ -83,7 +83,8 @@ import BimGroupsItemEditOffset from './BimGroupsItemEditOffset.vue';
 import {
   previewItem,
   stopPreview,
-} from '../../services/ProjectObjectInContext/PreviewCenter';
+  getViewer,
+} from 'spinal-spatial-referential';
 
 function itemToEditValidator(item) {
   return (
@@ -103,7 +104,7 @@ export default {
   },
   data() {
     return {
-      name,
+      name: '',
       offset: { r: 0, t: 0, z: 0 },
       uid: 0,
       previewMode: 0,
@@ -143,17 +144,17 @@ export default {
       this.preview();
     },
     preview() {
-      const viewer = window.spinal.ForgeViewer.viewer;
+      const viewer = getViewer();
       previewItem(this.itemToEdit, this.offset, this.previewMode, viewer);
     },
 
     onCancel() {
-      const viewer = window.spinal.ForgeViewer.viewer;
+      const viewer = getViewer();
       stopPreview(viewer);
       this.$emit('close');
     },
     onValid() {
-      const viewer = window.spinal.ForgeViewer.viewer;
+      const viewer = getViewer();
       stopPreview(viewer);
       this.$emit('close', {
         name: this.name,
@@ -170,8 +171,15 @@ export default {
   position: absolute;
   height: 100%;
   width: 100%;
+  overflow: hidden;
   background-color: rgb(34, 34, 34);
   opacity: 1;
+  z-index: 2;
+}
+.bim-groups-item-edit-container {
+  position: relative;
+  height: calc(100% - 56px);
+  overflow: auto;
 }
 
 .bim-groups-edit-name {

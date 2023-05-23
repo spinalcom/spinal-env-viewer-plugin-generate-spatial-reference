@@ -74,7 +74,8 @@ with this file. If not, see
 </template>
 
 <script>
-import { FileSystem } from 'spinal-core-connectorjs';
+import { getViewer } from 'spinal-spatial-referential';
+
 export default {
   name: 'BtnGroupViewInViewer',
   props: ['data', 'type'],
@@ -142,27 +143,27 @@ export default {
       if (event.shiftKey === true) return;
       const dbIds = this.getDbId(targetRoom);
       if (dbIds.length === 0) return;
-      const viewer = window.spinal.SpinalForgeViewer.viewerManager.viewer;
+      const viewer = getViewer();
       viewer.select(dbIds);
     },
     onClickFit(targetRoom) {
       const dbIds = this.getDbId(targetRoom);
       if (dbIds.length === 0) return;
-      const viewer = window.spinal.SpinalForgeViewer.viewerManager.viewer;
+      const viewer = getViewer();
       viewer.fitToView(dbIds);
     },
     onClickIsolate(event, targetRoom) {
       if (event.shiftKey === true) return;
       const dbIds = this.getDbId(targetRoom);
       if (dbIds.length === 0) return;
-      const viewer = window.spinal.SpinalForgeViewer.viewerManager.viewer;
+      const viewer = getViewer();
       viewer.isolate(dbIds);
     },
     onShiftClickSelect(targetRoom) {
       const dbIds = this.getDbId(targetRoom);
       if (dbIds.length === 0) return;
       console.log(dbIds.concat());
-      const viewer = window.spinal.SpinalForgeViewer.viewerManager.viewer;
+      const viewer = getViewer();
       const aggr = viewer.getAggregateSelection();
       this.getAggregateDbId(aggr, dbIds, 'selection');
       console.log(dbIds);
@@ -171,7 +172,7 @@ export default {
     onShiftClickIsolate(targetRoom) {
       const dbIds = this.getDbId(targetRoom);
       if (dbIds.length === 0) return;
-      const viewer = window.spinal.SpinalForgeViewer.viewerManager.viewer;
+      const viewer = getViewer();
       const aggr = viewer.getAggregateIsolation();
       this.getAggregateDbId(aggr, dbIds, 'ids');
       viewer.isolate(dbIds);

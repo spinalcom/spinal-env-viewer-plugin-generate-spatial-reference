@@ -27,6 +27,7 @@ import {
   GENERATION_CONTEXT_TYPE,
   GENERATION_TYPE,
   GENERATION_GEO_TYPE,
+  GENERATION_PROJECTION_TYPE,
 } from 'spinal-spatial-referential';
 
 const LABEL = 'Generate Context';
@@ -45,7 +46,8 @@ export class GenerateContextGeo extends SpinalContextApp {
   isShown(option) {
     if (option.context.type.get() === GENERATION_CONTEXT_TYPE &&
       option.selectedNode.type.get() === GENERATION_TYPE &&
-      option.selectedNode.generationType.get() === GENERATION_GEO_TYPE
+      (option.selectedNode.generationType.get() === GENERATION_GEO_TYPE ||
+        option.selectedNode.generationType.get() === GENERATION_PROJECTION_TYPE)
     ) {
       return Promise.resolve(true);
     }
@@ -54,7 +56,8 @@ export class GenerateContextGeo extends SpinalContextApp {
 
   async myAction(option) {
     spinal.spinalPanelManagerService.openPanel('CmdRunViewer', {
-      selectedNodeId: option.selectedNode.id.get()
+      selectedNodeId: option.selectedNode.id.get(),
+      contextId: option.context.id.get()
     });
   }
 }

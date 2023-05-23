@@ -24,6 +24,14 @@ with this file. If not, see
 <template>
   <v-container class="bim-groups-item-edit-offset" fluid grid-list-lg>
     <v-layout col align-center justify-center align-content-center wrap>
+      <input
+        type="color"
+        class="bim-groups-item-edit-offset-color"
+        name="color"
+        v-tooltip="'Preview color'"
+        v-model="color"
+      />
+
       <v-btn-toggle v-model="toggleView" mandatory>
         <v-btn
           v-tooltip="'Disable preview'"
@@ -101,7 +109,7 @@ function rtzValidator(item) {
 }
 
 import throttle from 'lodash.throttle';
-
+import { getColorPreview, setColorPreview } from 'spinal-spatial-referential';
 export default {
   name: 'BimGroupsItemEditOffset',
   props: {
@@ -115,6 +123,14 @@ export default {
     };
   },
   computed: {
+    color: {
+      get() {
+        return getColorPreview();
+      },
+      set(value) {
+        setColorPreview(value);
+      },
+    },
     _r: {
       get() {
         return this.offset.r;
@@ -172,5 +188,14 @@ export default {
 .bim-groups-item-edit-offset * {
   padding-bottom: 0 !important;
   padding-top: 0 !important;
+}
+.bim-groups-item-edit-offset-color {
+  height: 36px;
+  width: 34px;
+  margin-right: 8px;
+  cursor: pointer;
+  border-radius: 3px;
+  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+    0 1px 5px 0 rgba(0, 0, 0, 0.12);
 }
 </style>

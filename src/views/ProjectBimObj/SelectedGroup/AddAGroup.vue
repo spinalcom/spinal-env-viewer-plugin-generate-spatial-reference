@@ -23,7 +23,7 @@ with this file. If not, see
 -->
 
 <template>
-  <v-dialog v-model="show" width="500" attach="body">
+  <v-dialog v-model="show" attach="body">
     <template v-slot:activator="{ on }">
       <v-btn color="indigo" dark small fab v-on="on">
         <v-icon dark> add </v-icon>
@@ -76,10 +76,6 @@ export default {
       if (this.radioSelection === '3d') return false;
       return this.groupName.length === 0 || this.groupName.length >= 30;
     },
-    nudgeTop() {
-      if (this.radioSelection === '3d') return 387;
-      return 455;
-    },
   },
   watch: {
     show() {
@@ -87,6 +83,10 @@ export default {
     },
   },
   methods: {
+    onClick() {
+      console.log(this.$refs['dialog-add-a-group']);
+      this.$refs['dialog-add-a-group'].showModal();
+    },
     onConfirm() {
       if (this.radioSelection === '3d') {
         this.$emit('addSelection');
@@ -98,3 +98,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.dialog-add-a-group {
+  z-index: 99;
+}
+</style>

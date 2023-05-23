@@ -47,8 +47,8 @@ with this file. If not, see
 <script>
 import SpinalDiffFloorViewer from './SpinalDiffFloorViewer.vue';
 import {
-  generateCmd,
-  saveCmds,
+  generateCmdGeo,
+  saveCmdsGenerateGeo,
   addNodeGraphService,
   waitPathSendToHub,
 } from 'spinal-spatial-referential';
@@ -90,18 +90,19 @@ const SpinalDiffViewer = {
     async generate() {
       this.loading = true;
       try {
-        const cmds = await generateCmd(
+        const cmds = await generateCmdGeo(
           this.archiData,
           this.skipList,
           this.buildingServerId,
           this.bimFileId
         );
-        const { node, data } = await saveCmds(cmds);
+        const { node, context, data } = await saveCmdsGenerateGeo(cmds);
         addNodeGraphService(node);
         await waitPathSendToHub(data);
         spinal.spinalPanelManagerService.openPanel('CmdRunViewer', {
           dataCmd: cmds,
           node,
+          contextId: context.info.id.get(),
         });
       } catch (e) {
         console.error(e);

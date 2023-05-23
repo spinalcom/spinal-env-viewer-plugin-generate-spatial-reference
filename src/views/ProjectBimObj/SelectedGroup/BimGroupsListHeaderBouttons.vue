@@ -43,6 +43,17 @@ with this file. If not, see
         <v-icon>close</v-icon>
       </v-btn>
     </template>
+    <v-btn
+      v-if="isItemGroup"
+      v-tooltip="'Add viewer selections to group'"
+      fab
+      dark
+      small
+      color="indigo"
+      @click.stop="callEvent('addViewerSelection')"
+    >
+      <v-icon>add</v-icon>
+    </v-btn>
 
     <v-btn
       v-tooltip="'Show in viewer'"
@@ -81,9 +92,14 @@ with this file. If not, see
 
 <script>
 export default {
-  name: 'GroupeConfigItemBtn',
+  name: 'BimGroupsListHeaderBouttons',
   props: {
-    uid: { required: true, type: String },
+    index: { required: true, type: Number },
+    isItemGroup: {
+      required: false,
+      type: Boolean,
+      default: true,
+    },
   },
   data() {
     return {
@@ -97,7 +113,7 @@ export default {
   },
   methods: {
     callEvent(eventBtn) {
-      this.$emit(eventBtn, this.uid);
+      this.$emit(eventBtn, this.index);
     },
   },
 };
