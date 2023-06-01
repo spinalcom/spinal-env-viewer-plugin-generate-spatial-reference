@@ -44,17 +44,6 @@ with this file. If not, see
       </v-btn>
     </template>
 
-    <!-- <v-btn
-      v-tooltip="'Show in viewer'"
-      fab
-      dark
-      small
-      color="green"
-      @click.stop="callEvent('showInViewer')"
-    >
-      <v-icon>remove_red_eye</v-icon>
-    </v-btn> -->
-
     <v-btn
       v-tooltip="'Edit group'"
       fab
@@ -81,7 +70,7 @@ with this file. If not, see
 
 <script>
 export default {
-  name: 'GroupeConfigItemBtn',
+  name: 'GroupConfigItemBtn',
   props: {
     uid: { required: true, type: String },
   },

@@ -46,19 +46,13 @@ export default {
   data() {
     return {
       progress: 0,
-      status: 0,
       nodeId: '',
       contextId: '',
     };
   },
-  watch: {
-    status(value) {
-      this.$emit('status', value);
-    },
-  },
   methods: {
     async setUp(node, contextId) {
-      this.status = 0;
+      this.$emit('status', 0);
       this.progress = 0;
       this.nodeId = node.info.id.get();
       this.contextId = contextId;
@@ -72,7 +66,7 @@ export default {
     },
     async start() {
       try {
-        this.status = 1;
+        this.$emit('status', 1);
         this.progress = 0;
         console.log('dataCmdRes', this.dataCmd);
         await consumeCmdProjection(
@@ -81,7 +75,7 @@ export default {
           this.contextId,
           this.onProgress
         );
-        this.status = 2;
+        this.$emit('status', 2);
         console.log('doing 2nd pass');
         await consumeCmdProjection(
           this.dataCmd,
@@ -89,9 +83,9 @@ export default {
           this.contextId,
           this.onProgress
         );
-        this.status = 3;
+        this.$emit('status', 3);
       } catch (error) {
-        this.status = 4;
+        this.$emit('status', 4);
         throw error;
       }
     },

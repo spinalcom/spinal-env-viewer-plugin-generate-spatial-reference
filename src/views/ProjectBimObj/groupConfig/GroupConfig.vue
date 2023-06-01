@@ -23,8 +23,8 @@ with this file. If not, see
 -->
 
 <template>
-  <div class="geolocate-groupe-config-container">
-    <v-toolbar class="geolocate-groupe-config-header" color="black" dark dense>
+  <div class="geolocate-group-config-container">
+    <v-toolbar class="geolocate-group-config-header" color="black" dark dense>
       <v-spacer></v-spacer>
       <AddAGroupConfig @addAGroupConfig="addAGroupConfig"></AddAGroupConfig>
       <v-btn
@@ -46,9 +46,9 @@ with this file. If not, see
         <v-icon>check</v-icon>
       </v-btn>
     </v-toolbar>
-    <div class="geolocate-groupe-config-main">
-      <md-card class="geolocate-groupe-config-card">
-        <div class="geolocate-groupe-config-card-content spinal-scrollbar">
+    <div class="geolocate-group-config-main">
+      <md-card class="geolocate-group-config-card">
+        <div class="geolocate-group-config-card-content spinal-scrollbar">
           <md-list>
             <md-list-item v-if="groupConfigs.length === 0">
               <span class="md-list-item-text" style="white-space: normal">
@@ -61,7 +61,7 @@ with this file. If not, see
               @click="$emit('selectGroup', groupConfig)"
             >
               <md-checkbox
-                class="geolocate-groupe-config-card-item-checkbox"
+                class="geolocate-group-config-card-item-checkbox"
                 v-model="selected"
                 :value="groupConfig.uid"
               />
@@ -69,13 +69,13 @@ with this file. If not, see
                 <span>{{ groupConfig.name }}</span>
                 <span>count : {{ countChild(groupConfig) }}</span>
               </div>
-              <GroupeConfigItemBtn
+              <groupConfigItemBtn
                 :uid="groupConfig.uid"
                 @deleteGroup="itemDelete = groupConfig"
                 @showEdit="itmEdit = groupConfig"
-              ></GroupeConfigItemBtn>
+              ></groupConfigItemBtn>
               <v-progress-linear
-                class="geolocate-groupe-config-card-item-progressbar"
+                class="geolocate-group-config-card-item-progressbar"
                 v-if="groupConfig.progress != 100"
                 v-model="groupConfig.progress"
               ></v-progress-linear>
@@ -108,11 +108,11 @@ with this file. If not, see
 
 <script>
 import AddAGroupConfig from './AddAGroupConfig.vue';
-import GroupeConfigItemBtn from './GroupeConfigItemBtn.vue';
+import GroupConfigItemBtn from './GroupConfigItemBtn.vue';
 
 export default {
-  name: 'GroupeConfig',
-  components: { AddAGroupConfig, GroupeConfigItemBtn },
+  name: 'groupConfig',
+  components: { AddAGroupConfig, GroupConfigItemBtn },
   props: ['groupConfigs', 'canSave'],
   data() {
     return { show: true, selected: [], itmEdit: null, itemDelete: null };
@@ -153,28 +153,28 @@ export default {
 </script>
 
 <style scoped>
-.geolocate-groupe-config-container {
+.geolocate-group-config-container {
   height: 100%;
   display: flex;
   flex-direction: column;
 }
-.geolocate-groupe-config-header {
+.geolocate-group-config-header {
   position: relative;
   overflow: auto;
 }
-.geolocate-groupe-config-main {
+.geolocate-group-config-main {
   height: calc(100% - 48px);
   position: relative;
   overflow: auto;
 }
-.geolocate-groupe-config-card,
-.geolocate-groupe-config-card-content {
+.geolocate-group-config-card,
+.geolocate-group-config-card-content {
   height: 100%;
 }
-.geolocate-groupe-config-card-item-checkbox:first-child {
+.geolocate-group-config-card-item-checkbox:first-child {
   margin-right: 16px;
 }
-.geolocate-groupe-config-card-item-progressbar {
+.geolocate-group-config-card-item-progressbar {
   z-index: 1;
   position: absolute;
   bottom: 0;

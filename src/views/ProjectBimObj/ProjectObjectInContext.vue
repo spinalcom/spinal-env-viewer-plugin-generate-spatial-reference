@@ -70,6 +70,9 @@ import {
   saveCmdsProjectionGeo,
   addNodeGraphService,
   waitPathSendToHub,
+  getRoomRefByFloor,
+  mergeRoomRef,
+  getRefFloorZMinMax,
 } from 'spinal-spatial-referential';
 import GroupeConfig from './groupConfig/GroupConfig.vue';
 import SelectedGroup from './SelectedGroup/SelectedGroup.vue';
@@ -120,9 +123,16 @@ export default {
     },
     async generate(configUidToGens) {
       await this.onSave();
-      const context = getRealNode(this.contextId);
       this.progress = 0;
+      const context = getRealNode(this.contextId);
       try {
+        const roomRef = await getRoomRefByFloor();
+        console.log(roomRef);
+        this.progress = 25;
+
+        const floorsZData = await getRefFloorZMinMax(roomRef);
+
+        const mergedRoomRef = mergeRoomRef(roomRef);
         const intersectRes = {
           selection: [],
           intersects: [],
@@ -135,7 +145,10 @@ export default {
             );
             continue;
           }
-          const intersectResTmp = await getIntersects(configToGen, context);
+          const intersectResTmp = await getIntersects(
+            configToGen,
+            mergedRoomRef
+          );
           // merge intersectRes
           mergeIntersectRes(intersectRes, intersectResTmp);
           this.progress = (configUidToGens.length / (idx + 1)) * 66;
@@ -152,7 +165,8 @@ export default {
         this.progress = 80;
         const cmdProject = await createCmdProjection(
           intersectRes.intersects,
-          this.contextId
+          this.contextId,
+          floorsZData
         );
         console.log('cmdProject', cmdProject);
         this.progress = 90;

@@ -73,6 +73,18 @@ with this file. If not, see
               >
                 <template v-slot:activator>
                   <v-list-tile class="spinal-project-item-group-item-container">
+                    <div class="spinal-project-item-group-item-arrow-container">
+                      <v-btn ripple @click.stop="up(i)" :disabled="canUp(i)">
+                        <v-icon> expand_less </v-icon>
+                      </v-btn>
+                      <v-btn
+                        ripple
+                        @click.stop="down(i)"
+                        :disabled="canDown(i)"
+                      >
+                        <v-icon> expand_more </v-icon>
+                      </v-btn>
+                    </div>
                     <v-list-tile-content>
                       <v-list-tile-title
                         class="spinal-project-item-group-item-title-container"
@@ -110,7 +122,20 @@ with this file. If not, see
                 </div>
               </v-list-group>
 
-              <v-list-tile v-else :key="item.uid">
+              <v-list-tile
+                v-else
+                :key="item.uid"
+                class="spinal-project-item-group-item-container"
+              >
+                <div class="spinal-project-item-group-item-arrow-container">
+                  <v-btn ripple @click="up(i)" :disabled="canUp(i)">
+                    <v-icon> expand_less </v-icon>
+                  </v-btn>
+                  <v-btn ripple @click="down(i)" :disabled="canDown(i)">
+                    <v-icon> expand_more </v-icon>
+                  </v-btn>
+                </div>
+
                 <v-list-tile-content
                   class="spinal-project-item-group-item-title-container"
                 >
@@ -173,6 +198,24 @@ export default {
   },
   computed: {},
   methods: {
+    up(idx) {
+      const itm = this.list[idx];
+      this.list.splice(idx, 1);
+      this.list.splice(idx - 1, 0, itm);
+      this.$emit('savableCfg');
+    },
+    down(idx) {
+      const itm = this.list[idx];
+      this.list.splice(idx, 1);
+      this.list.splice(idx + 1, 0, itm);
+      this.$emit('savableCfg');
+    },
+    canUp(idx) {
+      return idx === 0;
+    },
+    canDown(idx) {
+      return idx === this.list.length - 1;
+    },
     generate() {
       this.$emit('generate', [this.uid]);
     },
@@ -186,6 +229,7 @@ export default {
     },
     isProjectionGroup: isProjectionGroup,
     addViewerSelection(idx) {
+      this.$emit('savableCfg');
       return addViewerSelection(idx, this.list, getViewer());
     },
     showInViewer(index, itm) {
@@ -201,10 +245,12 @@ export default {
     deleteItemIngroup(index, itm) {
       const item = this.list[index];
       if (isProjectionGroup(item)) {
+        this.$emit('savableCfg');
         item.deleteItem(itm);
       }
     },
     deleteGroup(index) {
+      this.$emit('savableCfg');
       this.list.splice(index, 1);
     },
     showEdit(index) {
@@ -258,6 +304,19 @@ export default {
   width: 100%;
   overflow: hidden;
 }
+.spinal-project-item-group-item-arrow-container {
+  position: absolute;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  height: 48px;
+}
+.spinal-project-item-group-item-arrow-container > button {
+  margin: 0;
+  padding: 0;
+  height: 24px;
+  min-width: unset;
+}
 </style>
 
 <style>
@@ -268,5 +327,9 @@ export default {
   .spinal-project-item-group-item-container
   > .v-list__tile {
   padding-right: 0;
+}
+.spinal-project-item-group-item-container > .v-list__tile {
+  padding-right: 0;
+  padding-left: 32px;
 }
 </style>
