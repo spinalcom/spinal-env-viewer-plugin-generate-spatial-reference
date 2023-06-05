@@ -124,14 +124,10 @@ export default {
     async generate(configUidToGens) {
       await this.onSave();
       this.progress = 0;
-      const context = getRealNode(this.contextId);
       try {
         const roomRef = await getRoomRefByFloor();
-        console.log(roomRef);
         this.progress = 25;
-
         const floorsZData = await getRefFloorZMinMax(roomRef);
-
         const mergedRoomRef = mergeRoomRef(roomRef);
         const intersectRes = {
           selection: [],
