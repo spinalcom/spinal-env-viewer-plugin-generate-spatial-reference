@@ -162,11 +162,9 @@ export default {
     onShiftClickSelect(targetRoom) {
       const dbIds = this.getDbId(targetRoom);
       if (dbIds.length === 0) return;
-      console.log(dbIds.concat());
       const viewer = getViewer();
       const aggr = viewer.getAggregateSelection();
       this.getAggregateDbId(aggr, dbIds, 'selection');
-      console.log(dbIds);
       viewer.select(dbIds);
     },
     onShiftClickIsolate(targetRoom) {

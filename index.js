@@ -30,11 +30,13 @@ Vue.use(Vuetify);
 
 import DialogGenerateContext from './src/views/SelectModelModal.vue';
 import ProjectObjectInContext from "./src/views/ProjectBimObj/ProjectObjectInContext.vue";
+import AssingView from "./src/views/ProjectBimObj/AssingView/AssingView.vue";
 import { SpinalForgeExtention } from "spinal-env-viewer-panel-manager-service_spinalforgeextention";
 
 import { ButtonGenerateContext } from "./src/buttons/generate";
 import { ButtonAddObjectToCategory } from "./src/buttons/AddObjectToContext";
 import { GenerateContextGeo } from "./src/buttons/RunGeneration";
+import { ManualAssingmentButton } from "./src/buttons/ManualAssingment";
 import "./src/views/diffViewer/index";
 import "./src/views/CmdRunViewer/index";
 export const TOP_BAR_HOOK_NAME = 'GraphManagerTopBar';
@@ -43,6 +45,7 @@ const SIDE_BAR_HOOK_NAME = "GraphManagerSideBar";
 spinalContextMenuService.registerApp(TOP_BAR_HOOK_NAME, new ButtonGenerateContext(), [7]);
 spinalContextMenuService.registerApp(SIDE_BAR_HOOK_NAME, new ButtonAddObjectToCategory(), [7]);
 spinalContextMenuService.registerApp(SIDE_BAR_HOOK_NAME, new GenerateContextGeo(), [7]);
+spinalContextMenuService.registerApp(SIDE_BAR_HOOK_NAME, new ManualAssingmentButton(), [7]);
 
 // SpinalMountExtention.mount({
 //   // name registered.
@@ -91,3 +94,22 @@ SpinalForgeExtention.registerExtention('DialogAddObject', SpinalForgeExtention.c
     height: '250px'
   }
 }));
+SpinalForgeExtention.registerExtention('panelManualAssingView', SpinalForgeExtention.createExtention({
+  name: "panelManualAssingView",
+  // Vue.extend to create a Compoment constructor
+  vueMountComponent: Vue.extend(AssingView),
+  // where to  append the Compoment
+  parentContainer: document.body,
+
+  panel: {
+    title: "Manuel Assingnement",
+    classname: "spinal-pannel",
+    closeBehaviour: "delete"
+  },
+  style: {
+    left: "405px",
+    width: "690px",
+    height: '250px'
+  }
+}));
+;
