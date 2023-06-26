@@ -120,14 +120,3 @@ export function getModelByName(name) {
   }
 }
 
-
-// eslint-disable-next-line no-unused-vars
-function mainTest() {
-  function create(key, value) { return { key, value }; }
-  const d = [
-    createCat('Revit Level'),
-    create(createInput('e', 'Identifiant'), createInput("r", '[0-9]+'))
-  ];
-  getObjFromRvtModel(window.NOP_VIEWER.model, d).then(console.log);
-  // getCatFromRvtModel(NOP_VIEWER.model).then(console.log);
-}

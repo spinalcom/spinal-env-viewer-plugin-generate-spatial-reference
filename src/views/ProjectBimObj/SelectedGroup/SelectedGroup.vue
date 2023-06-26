@@ -35,7 +35,7 @@ with this file. If not, see
       <v-btn
         icon
         round
-        @click="$emit('save')"
+        @click="$emit('save', [uid])"
         color="warning"
         :disabled="canSave"
       >

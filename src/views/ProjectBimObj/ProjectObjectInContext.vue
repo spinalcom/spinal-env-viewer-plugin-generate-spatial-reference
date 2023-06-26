@@ -28,12 +28,10 @@ with this file. If not, see
       <GroupeConfig
         v-if="selectedGroup === undefined"
         :groupConfigs="groupConfigs"
-        :can-save="cleanCfg"
         @addAGroupConfig="addAGroupConfig"
         @selectGroup="onselectedGroup"
         @generate="generate"
         @save="onSave"
-        @savableCfg="cleanCfg = false"
         @deleteGroup="deleteGroup"
       ></GroupeConfig>
       <SelectedGroup
@@ -53,16 +51,26 @@ with this file. If not, see
         v-model="progress"
       ></v-progress-linear>
     </div>
+    <md-snackbar
+      :md-position="'center'"
+      :md-active.sync="showSnackbar"
+      md-persistent
+      class="md-accent"
+    >
+      <span>{{ msgSnackbar }}</span>
+      <md-button class="md-primary" @click="showSnackbar = false"
+        >close</md-button
+      >
+    </md-snackbar>
   </v-app>
 </template>
 
 <script>
 import {
-  ProjectionGroupConfig,
   getProjectionConfig,
   getRealNode,
   removeConfigFromContext,
-  createConfigNode,
+  createConfigNodeAndProjGroup,
   getIntersects,
   mergeIntersectRes,
   createCmdNotFound,
@@ -87,30 +95,52 @@ export default {
       selectedGroup: undefined,
       cleanCfg: true,
       progress: 100,
+      errorMode: true,
+      msgSnackbar: '',
+      showSnackbar: false,
     };
   },
   mounted() {},
   methods: {
-    addAGroupConfig(groupName) {
-      const cfgGroup = new ProjectionGroupConfig(groupName);
-      this.groupConfigs.push(cfgGroup);
+    async addAGroupConfig(groupName) {
       const context = getRealNode(this.contextId);
-      return createConfigNode(context, cfgGroup);
+      const cfgGroup = await createConfigNodeAndProjGroup(context, groupName);
+      this.groupConfigs.push(cfgGroup);
     },
-    onselectedGroup(select) {
-      this.selectedGroup = select;
+    async onselectedGroup(select) {
+      this.progress = 0;
+      try {
+        await select.loadConfigNode();
+        this.selectedGroup = select;
+        this.progress = 100;
+      } catch (error) {
+        console.error(error);
+        this.showSnackbar = true;
+        this.msgSnackbar = error.message;
+        this.progress = 100;
+      }
     },
-    async onSave() {
+    async onSave(configUidToGens) {
       try {
         const context = getRealNode(this.contextId);
+        if (!configUidToGens)
+          configUidToGens = this.groupConfigs.map((it) => it.uid);
         this.progress = 0;
-        for (let idx = 0; idx < this.groupConfigs.length; idx++) {
-          const group = this.groupConfigs[idx];
+        for (let idx = 0; idx < configUidToGens.length; idx++) {
+          const group = this.getConfigByUid(configUidToGens[idx]);
+          if (!group) {
+            console.error(
+              `${configUidToGens[idx]} skipped no config found with this uid`
+            );
+            continue;
+          }
           await group.saveToContext(context);
-          this.progress = (this.groupConfigs.length / (idx + 1)) * 100;
+          this.progress = (configUidToGens.length / (idx + 1)) * 100;
         }
         this.cleanCfg = true;
       } catch (error) {
+        this.showSnackbar = true;
+        this.msgSnackbar = error.message;
         console.error(error);
       } finally {
         this.progress = 100;
@@ -122,7 +152,7 @@ export default {
       }
     },
     async generate(configUidToGens) {
-      await this.onSave();
+      await this.onSave(configUidToGens);
       this.progress = 0;
       try {
         const roomRef = await getRoomRefByFloor();

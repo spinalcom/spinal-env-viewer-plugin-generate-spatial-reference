@@ -27,13 +27,7 @@ with this file. If not, see
     <v-toolbar class="geolocate-group-config-header" color="black" dark dense>
       <v-spacer></v-spacer>
       <AddAGroupConfig @addAGroupConfig="addAGroupConfig"></AddAGroupConfig>
-      <v-btn
-        icon
-        round
-        @click="$emit('save')"
-        color="warning"
-        :disabled="canSave"
-      >
+      <v-btn icon round @click="$emit('save')" color="warning">
         <v-icon>save</v-icon>
       </v-btn>
       <v-btn
@@ -67,7 +61,7 @@ with this file. If not, see
               />
               <div class="md-list-item-text">
                 <span>{{ groupConfig.name }}</span>
-                <span>count : {{ countChild(groupConfig) }}</span>
+                <span>{{ countChild(groupConfig) }}</span>
               </div>
               <groupConfigItemBtn
                 :uid="groupConfig.uid"
@@ -113,7 +107,7 @@ import GroupConfigItemBtn from './GroupConfigItemBtn.vue';
 export default {
   name: 'groupConfig',
   components: { AddAGroupConfig, GroupConfigItemBtn },
-  props: ['groupConfigs', 'canSave'],
+  props: ['groupConfigs'],
   data() {
     return { show: true, selected: [], itmEdit: null, itemDelete: null };
   },
@@ -137,7 +131,11 @@ export default {
   },
   methods: {
     countChild(groupConfig) {
-      return groupConfig.countChild();
+      if (groupConfig.isLoaded === true) {
+        return 'count : ' + groupConfig.countChild();
+      } else {
+        return '';
+      }
     },
     addAGroupConfig(target) {
       this.$emit('addAGroupConfig', target);

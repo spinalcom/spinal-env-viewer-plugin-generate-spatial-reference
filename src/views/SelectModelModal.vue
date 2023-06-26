@@ -111,6 +111,17 @@ with this file. If not, see
         :indeterminate="true"
         color="primary"
       />
+      <md-snackbar
+        :md-position="'center'"
+        :md-active.sync="showSnackbar"
+        :md-duration="durationSnakebar"
+        md-persistent
+      >
+        <span>{{ msgSnackbar }}</span>
+        <md-button class="md-primary" @click="showSnackbar = false"
+          >close</md-button
+        >
+      </md-snackbar>
     </div>
   </v-app>
 </template>
@@ -148,6 +159,9 @@ export default {
       selectedModel: null,
       selectedModelModal: null,
       showDialog: false,
+      showSnackbar: false,
+      msgSnackbar: '',
+      durationSnakebar: Infinity,
       scripts: [
         { divider: true, title: 'Script before update' },
         { title: 'Update dbids from externalIds', fct: this.updateDbIds },
@@ -234,7 +248,16 @@ export default {
     },
     setCenterPosInContextGeo() {
       const graph = getGraph();
-      return setCenterPosInContextGeo(graph);
+      return setCenterPosInContextGeo(graph, this.callbackScript);
+    },
+    callbackScript(msg) {
+      if (!msg || msg === 'done') {
+        this.durationSnakebar = 4000;
+      } else {
+        this.showSnackbar = true;
+        this.durationSnakebar = Infinity;
+      }
+      this.msgSnackbar = msg;
     },
     async launchFct(fct) {
       this.spin = true;
@@ -275,7 +298,6 @@ export default {
       }
     },
     async advancedGenerate(cfg) {
-      // console.log('cfg', cfg);
       const graph = getGraph();
       const spatialConfig = await loadConfig(graph);
       spatialConfig.saveConfig(cfg);

@@ -159,7 +159,6 @@ export default {
       );
     },
     onCancel(item) {
-      console.log('onCancel', item);
       item.validId = '';
       this.updateData();
     },

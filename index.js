@@ -84,7 +84,7 @@ SpinalForgeExtention.registerExtention('DialogAddObject', SpinalForgeExtention.c
   parentContainer: document.body,
 
   panel: {
-    title: "Project objets in context",
+    title: "Project objects in context",
     classname: "spinal-pannel",
     closeBehaviour: "delete"
   },
@@ -102,7 +102,7 @@ SpinalForgeExtention.registerExtention('panelManualAssingView', SpinalForgeExten
   parentContainer: document.body,
 
   panel: {
-    title: "Manuel Assingnement",
+    title: "Manual assignation",
     classname: "spinal-pannel",
     closeBehaviour: "delete"
   },

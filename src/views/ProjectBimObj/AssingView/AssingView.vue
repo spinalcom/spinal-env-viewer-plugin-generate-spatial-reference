@@ -121,27 +121,6 @@ export default {
     },
     async generate() {
       this.$refs.assingDataView.generate();
-      // const cmdProject = await createCmdProjection2(
-      //   intersectRes.intersects,
-      //   this.contextId,
-      //   floorsZData
-      // );
-      // console.log('cmdProject', cmdProject);
-      // this.progress = 90;
-      // const cmd = cmdNotFounds.concat(cmdProject);
-      // const {
-      //   node,
-      //   context: contextCmd,
-      //   data,
-      // } = await saveCmdsProjectionGeo(cmd);
-      // addNodeGraphService(node);
-      // await waitPathSendToHub(data);
-      // console.log('done', cmd);
-      // spinal.spinalPanelManagerService.openPanel('CmdRunViewer', {
-      //   dataCmd: cmd,
-      //   node,
-      //   contextId: contextCmd.info.id.get(),
-      // });
     },
     async opened({ contextId, selectedNodeId }) {
       this.contextId = contextId;

@@ -84,7 +84,6 @@ export default {
   },
   methods: {
     onClick() {
-      console.log(this.$refs['dialog-add-a-group']);
       this.$refs['dialog-add-a-group'].showModal();
     },
     onConfirm() {

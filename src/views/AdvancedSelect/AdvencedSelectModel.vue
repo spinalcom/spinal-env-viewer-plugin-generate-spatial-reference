@@ -258,8 +258,6 @@ export default {
     async seeTestList(dataRegexp) {
       const model = getModelByName(this.basic.selectedModel);
       this.testItems = await getObjFromRvtModel(model, dataRegexp);
-
-      console.log('this.testItems', this.testItems);
       this.showTestList = true;
     },
   },

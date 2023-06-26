@@ -107,8 +107,6 @@ export default {
       this.$emit('roomSelect', roomId);
     },
     async generate() {
-      console.log('generate', this.errorArr, this.warnArr);
-
       const { cmd, cmdMiss } = await createCmdProjectionForManualAssing(
         this.warnArr,
         this.errorArr
