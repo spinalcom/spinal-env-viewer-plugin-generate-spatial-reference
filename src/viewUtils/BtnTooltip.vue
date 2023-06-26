@@ -24,13 +24,9 @@ with this file. If not, see
 
 <template>
   <div :id="id">
-    <v-tooltip :attach="`#${id}`"
-               bottom>
+    <v-tooltip :attach="`#${id}`" bottom>
       <template v-slot:activator="{ on }">
-        <v-btn icon
-               ripple
-               v-on="on"
-               @click.stop="$emit('clicked',item)">
+        <v-btn icon ripple v-on="on" @click.stop="$emit('clicked', item)">
           <v-icon color="grey lighten-1">
             {{ icon }}
           </v-icon>
@@ -44,17 +40,17 @@ with this file. If not, see
 <script>
 let nbr = 0;
 export default {
-  name: "BtnTooltip",
+  name: 'BtnTooltip',
   props: {
-    icon: { require: true, type: String, default: () => "arrow_forward_ios" },
-    tooltip: { require: true, type: String, default: () => "" }
+    icon: { require: true, type: String, default: () => 'arrow_forward_ios' },
+    tooltip: { require: true, type: String, default: () => '' },
   },
   data() {
-    return { id: "spinal-btn-tooltip" };
+    return { id: 'spinal-btn-tooltip' };
   },
   mounted() {
     this.id = this.id + nbr;
     nbr++;
-  }
+  },
 };
 </script>

@@ -24,100 +24,151 @@ with this file. If not, see
 <template>
   <v-card>
     <v-card-text>
-      <slot />
       <md-field>
-        <label for="modelselect">Selection of the model that contains the
-          architecture</label>
-        <md-select id="modelselect"
-                   v-model="selectedModel"
-                   name="modelselect"
-                   md-dense>
-          <md-option v-for="bimfile in bimfiles"
-                     :value="bimfile">
+        <label for="modelselect"
+          >Selection of the model that contains the architecture</label
+        >
+        <md-select
+          id="modelselect"
+          v-model="selectedModel"
+          name="modelselect"
+          md-dense
+        >
+          <md-option v-for="bimfile in bimfiles" :value="bimfile">
             {{ bimfile }}
           </md-option>
         </md-select>
       </md-field>
-
-      <!-- <v-select :items="bimfiles"
-                attach="#spinalbasicselectcard"
-                label="Selection of the model that contains the architecture"
-                @change="onModelSelected" /> -->
-      <!-- <div id="spinalbasicselectcard" /> -->
-      <v-text-field v-model="buildingNameCompu"
-                    placeholder="Building Name"
-                    label="Building name" />
-
-      <v-checkbox v-model="addLevelCompu"
-                  :label="`Add only a Level`" />
+      <md-field>
+        <label for="building select">select the building</label>
+        <md-select
+          id="building select"
+          v-model="buildingSelectedValue"
+          name="building select"
+          md-dense
+          class="building-select"
+        >
+          <md-option
+            v-for="building in buildings"
+            :key="building.value"
+            :value="building.value"
+          >
+            {{ building.label }}
+          </md-option>
+        </md-select>
+        <md-button
+          class="md-icon-button"
+          md-dense
+          @click="
+            newBuildingValue = '';
+            openDialogNewBuilding = true;
+          "
+        >
+          <md-icon>add</md-icon>
+        </md-button>
+      </md-field>
     </v-card-text>
     <v-card-actions>
       <v-spacer />
-      <v-btn color="green darken-1"
-             flat
-             :disabled="btnDisabledCompu"
-             @click="onContinue">
+      <v-btn
+        color="green darken-1"
+        flat
+        :disabled="btnDisabledCompu"
+        @click="onContinue"
+      >
         {{ btnLabel }}
       </v-btn>
     </v-card-actions>
+    <md-dialog-prompt
+      :md-active.sync="openDialogNewBuilding"
+      v-model="newBuildingValue"
+      :md-title="title"
+      md-input-maxlength="30"
+      md-input-placeholder="Type the building name..."
+      md-confirm-text="Done"
+      @md-confirm="onAcceptNewBuilding(newBuildingValue)"
+    />
   </v-card>
 </template>
 
 <script>
+import {
+  getContextSpatial,
+  getGraph,
+  waitGetServerId,
+} from 'spinal-spatial-referential';
+import geoService from 'spinal-env-viewer-context-geographic-service';
+
 export default {
-  name: "Basicselectmodel",
+  name: 'Basicselectmodel',
   props: {
     bimfiles: { require: true, type: Array, default: () => [] },
-    btnLabel: { type: String, default: () => "Générer" },
-    btnDisabled: { type: Boolean, default: () => false }
+    btnLabel: { type: String, default: () => 'Continue' },
+    btnDisabled: { type: Boolean, default: () => false },
   },
   data() {
     return {
       addLevel: false,
-      buildingName: "",
       selectedModel: null,
-      spinalbasicselectcard: null
+      newBuildingValue: '',
+      manualAssingment: new Map(),
+      openDialogNewBuilding: false,
+      buildings: [],
+      buildingSelectedValue: null,
     };
   },
   computed: {
-    addLevelCompu: {
-      get() {
-        return this.addLevel;
-      },
-      set(value) {
-        this.addLevel = value;
-      }
-    },
-    buildingNameCompu: {
-      get() {
-        return this.buildingName;
-      },
-      set(value) {
-        this.buildingName = value;
-      }
-    },
     btnDisabledCompu() {
       return (
         this.btnDisabled ||
-        this.buildingName === "" ||
-        this.selectedModel === null
+        this.selectedModel === null ||
+        !this.buildingSelectedValue
       );
-    }
+    },
   },
   mounted() {
-    this.spinalbasicselectcard = this.$refs.spinalbasicselectcard;
+    return this.getBuildings();
   },
   methods: {
     onModelSelected(value) {
       this.selectedModel = value;
     },
-    onContinue() {
-      this.$emit("continue", {
-        addLevel: this.addLevel,
-        buildingName: this.buildingName,
-        selectedModel: this.selectedModel
+    async getBuildings() {
+      const graph = getGraph();
+      const contextGeo = await getContextSpatial(graph);
+      const buildings = await contextGeo.getChildrenInContext(contextGeo);
+      this.buildings = buildings.map((itm) => {
+        return {
+          label: itm.info.name.get(),
+          value: itm._server_id,
+        };
       });
-    }
-  }
+      if (this.buildings.length === 1)
+        this.buildingSelectedValue = this.buildings[0].value;
+    },
+    async onAcceptNewBuilding(buildingName) {
+      const graph = getGraph();
+      const contextGeo = await getContextSpatial(graph);
+      const node = await geoService.addBuilding(
+        contextGeo.info.id.get(),
+        contextGeo.info.id.get(),
+        buildingName
+      );
+      await waitGetServerId(node);
+      return this.getBuildings();
+    },
+    onContinue() {
+      this.$emit('continue', {
+        buildingServId: this.buildingSelectedValue,
+        selectedModel: this.selectedModel,
+      });
+    },
+  },
 };
 </script>
+
+<style scoped>
+.building-select {
+  align-items: flex-end;
+}
+</style>

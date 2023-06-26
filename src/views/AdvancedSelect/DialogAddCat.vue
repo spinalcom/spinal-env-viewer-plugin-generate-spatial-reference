@@ -23,9 +23,7 @@ with this file. If not, see
 -->
 
 <template>
-  <v-dialog v-model="openDialogCompu"
-            persistent
-            lazy>
+  <v-dialog v-model="openDialogCompu" persistent lazy>
     <v-card class="spinal-model-gen-context-dialog-edit-cat">
       <!-- <v-card-title>
         <span class="headline"></span>
@@ -34,16 +32,16 @@ with this file. If not, see
       <v-card-text>
         <v-container grid-list-md>
           <v-layout wrap>
-            <v-flex xs12
-                    sm6>
+            <v-flex xs12 sm6>
               <h4>Attribut name</h4>
               <md-field>
-                <md-select id="selectKeyFlagType"
-                           v-model="selectKeyFlagTypeComp"
-                           name="selectKeyFlagType"
-                           md-dense>
-                  <md-option v-for="item in items"
-                             :value="item.name">
+                <md-select
+                  id="selectKeyFlagType"
+                  v-model="selectKeyFlagTypeComp"
+                  name="selectKeyFlagType"
+                  md-dense
+                >
+                  <md-option v-for="item in items" :value="item.name">
                     {{ item.name }}
                   </md-option>
                 </md-select>
@@ -55,25 +53,26 @@ with this file. If not, see
                         item-text="name"
                         item-value="value" /> -->
               <div>
-                <v-text-field v-model="resultKey"
-                              label="Nom" />
-                <v-text-field v-if="haveKeyFlag"
-                              v-model="resultKeyFlag"
-                              class="input-regex-fleg"
-                              label="indicateur(s)" />
+                <v-text-field v-model="resultKey" label="Nom" />
+                <v-text-field
+                  v-if="haveKeyFlag"
+                  v-model="resultKeyFlag"
+                  class="input-regex-fleg"
+                  label="indicateur(s)"
+                />
               </div>
             </v-flex>
-            <v-flex xs12
-                    sm6>
+            <v-flex xs12 sm6>
               <h4>Attribut value</h4>
 
               <md-field>
-                <md-select id="selectValFlagType"
-                           v-model="selectValFlagTypeComp"
-                           name="selectValFlagType"
-                           md-dense>
-                  <md-option v-for="item in items"
-                             :value="item.name">
+                <md-select
+                  id="selectValFlagType"
+                  v-model="selectValFlagTypeComp"
+                  name="selectValFlagType"
+                  md-dense
+                >
+                  <md-option v-for="item in items" :value="item.name">
                     {{ item.name }}
                   </md-option>
                 </md-select>
@@ -86,12 +85,13 @@ with this file. If not, see
                         item-value="value" /> -->
 
               <div>
-                <v-text-field v-model="resultValue"
-                              label="Valeur" />
-                <v-text-field v-if="haveValFlag"
-                              v-model="resultValFlag"
-                              class="input-regex-fleg"
-                              label="indicateur(s)" />
+                <v-text-field v-model="resultValue" label="Valeur" />
+                <v-text-field
+                  v-if="haveValFlag"
+                  v-model="resultValFlag"
+                  class="input-regex-fleg"
+                  label="indicateur(s)"
+                />
               </div>
             </v-flex>
           </v-layout>
@@ -100,15 +100,8 @@ with this file. If not, see
 
       <v-card-actions>
         <v-spacer />
-        <v-btn color="blue darken-1"
-               flat
-               @click="close">
-          Cancel
-        </v-btn>
-        <v-btn color="blue darken-1"
-               flat
-               :disabled="btnValid"
-               @click="save">
+        <v-btn color="blue darken-1" flat @click="close"> Cancel </v-btn>
+        <v-btn color="blue darken-1" flat :disabled="btnValid" @click="save">
           Save
         </v-btn>
       </v-card-actions>
@@ -118,29 +111,29 @@ with this file. If not, see
 
 <script>
 export default {
-  name: "DialogAddCat",
+  name: 'DialogAddCat',
   props: [
-    "keyData",
-    "keyType",
-    "keyFlag",
-    "val",
-    "valType",
-    "valFlag",
-    "openDialog"
+    'keyData',
+    'keyType',
+    'keyFlag',
+    'val',
+    'valType',
+    'valFlag',
+    'openDialog',
   ],
   data() {
     return {
       items: [
-        { name: "Equal", value: "e" },
-        { name: "Contains", value: "c" },
-        { name: "Advanced (Regular expression)", value: "r" }
+        { name: 'Equal', value: 'e' },
+        { name: 'Contains', value: 'c' },
+        { name: 'Advanced (Regular expression)', value: 'r' },
       ],
       result_key: null,
       result_keyFlag: null,
       result_keyType: null,
       result_val: null,
       result_valFlag: null,
-      result_valType: null
+      result_valType: null,
     };
   },
   computed: {
@@ -154,7 +147,7 @@ export default {
             this.selectValFlagType = item;
           }
         }
-      }
+      },
     },
     selectKeyFlagTypeComp: {
       get() {
@@ -166,13 +159,13 @@ export default {
             this.selectKeyFlagType = item;
           }
         }
-      }
+      },
     },
     haveValFlag() {
-      return this.selectValFlagType.value === "r";
+      return this.selectValFlagType.value === 'r';
     },
     haveKeyFlag() {
-      return this.selectKeyFlagType.value === "r";
+      return this.selectKeyFlagType.value === 'r';
     },
     openDialogCompu: {
       get() {
@@ -180,12 +173,12 @@ export default {
       },
       set(value) {
         if (value) {
-          this.$emit("close");
+          this.$emit('close');
         }
-      }
+      },
     },
     btnValid() {
-      return this.resultValue === "" && this.selectKeyFlagType === "";
+      return this.resultValue === '' && this.selectKeyFlagType === '';
     },
     selectKeyFlagType: {
       get() {
@@ -199,31 +192,31 @@ export default {
             if (this.keyType === type.value) return type;
           }
         }
-        return { name: "Egale", value: "e" };
+        return { name: 'Egale', value: 'e' };
       },
       set(value) {
         this.result_keyType = value.value;
-      }
+      },
     },
     resultKey: {
       get() {
         if (this.result_key) return this.result_key;
         if (this.keyData) return this.keyData;
-        return "";
+        return '';
       },
       set(value) {
         this.result_key = value;
-      }
+      },
     },
     resultKeyFlag: {
       get() {
         if (this.result_keyFlag) return this.result_keyFlag;
         if (this.keyFlag) return this.keyFlag;
-        return "";
+        return '';
       },
       set(value) {
         this.result_keyFlag = value;
-      }
+      },
     },
     selectValFlagType: {
       get() {
@@ -237,32 +230,32 @@ export default {
             if (this.valType === type.value) return type;
           }
         }
-        return { name: "Egale", value: "e" };
+        return { name: 'Egale', value: 'e' };
       },
       set(value) {
         this.result_valType = value.value;
-      }
+      },
     },
     resultValue: {
       get() {
         if (this.result_key) return this.result_val;
         if (this.val) return this.val;
-        return "";
+        return '';
       },
       set(value) {
         this.result_val = value;
-      }
+      },
     },
     resultValFlag: {
       get() {
         if (this.result_valFlag) return this.result_valFlag;
         if (this.valFlag) return this.valFlag;
-        return "";
+        return '';
       },
       set(value) {
         this.result_valFlag = value;
-      }
-    }
+      },
+    },
   },
   watch: {
     openDialog(value) {
@@ -274,11 +267,11 @@ export default {
         this.result_valFlag = null;
         this.result_valType = null;
       }
-    }
+    },
   },
   methods: {
     close() {
-      this.$emit("cancel");
+      this.$emit('cancel');
     },
     save() {
       const res = {
@@ -287,11 +280,11 @@ export default {
         keyType: this.selectKeyFlagType.value,
         val: this.resultValue.trim(),
         valFlag: this.resultValFlag,
-        valType: this.selectValFlagType.value
+        valType: this.selectValFlagType.value,
       };
-      this.$emit("save", res);
-    }
-  }
+      this.$emit('save', res);
+    },
+  },
 };
 </script>
 

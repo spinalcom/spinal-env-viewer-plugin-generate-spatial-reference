@@ -26,96 +26,96 @@ with this file. If not, see
   <v-card>
     <v-card-text>
       <slot />
-      <v-checkbox v-model="useCat"
-                  label="Use a Category" />
+      <v-checkbox v-model="useCat" label="Use a Category" />
       <md-field v-if="useCat === true">
-        <md-select id="catLstRes"
-                   v-model="catUsed"
-                   name="catLstRes"
-                   md-dense>
-          <md-option v-for="cat in catLst"
-                     :value="cat">
+        <md-select id="catLstRes" v-model="catUsed" name="catLstRes" md-dense>
+          <md-option v-for="cat in catLst" :value="cat">
             {{ cat }}
           </md-option>
         </md-select>
       </md-field>
 
-      <v-data-table v-if="useCat === false"
-                    :headers="headers"
-                    :items="items">
+      <v-data-table v-if="useCat === false" :headers="headers" :items="items">
         <template v-slot:items="props">
           <td>
-            {{ printInput(props.item.keyType, props.item.key, props.item.keyFlag) }}
+            {{
+              printInput(props.item.keyType, props.item.key, props.item.keyFlag)
+            }}
           </td>
           <td class="text-xs-left">
-            {{ printInput(props.item.valType, props.item.val, props.item.valFlag) }}
+            {{
+              printInput(props.item.valType, props.item.val, props.item.valFlag)
+            }}
           </td>
 
           <td class="justify-center layout px-0">
-            <v-icon small
-                    class="mr-2"
-                    @click="editItem(props.item)">
+            <v-icon small class="mr-2" @click="editItem(props.item)">
               edit
             </v-icon>
-            <v-icon small
-                    @click="deleteItem(props.item)">
-              delete
-            </v-icon>
+            <v-icon small @click="deleteItem(props.item)"> delete </v-icon>
           </td>
         </template>
       </v-data-table>
     </v-card-text>
     <v-card-actions>
-      <v-btn v-tooltip="'test the filter result'"
-             flat
-             icon
-             :disabled="btnDisabledCompu"
-             @click="onSeeList">
+      <v-btn
+        v-tooltip="'test the filter result'"
+        flat
+        icon
+        :disabled="btnDisabledCompu"
+        @click="onSeeList"
+      >
         <v-icon>list</v-icon>
       </v-btn>
 
-      <v-btn v-if="useCat === false"
-             v-tooltip="'Add a filter'"
-             flat
-             icon
-             :disabled="btnDisabledCompu"
-             @click="addNewFilter">
+      <v-btn
+        v-if="useCat === false"
+        v-tooltip="'Add a filter'"
+        flat
+        icon
+        :disabled="btnDisabledCompu"
+        @click="addNewFilter"
+      >
         <v-icon>add</v-icon>
       </v-btn>
       <v-spacer />
-      <v-btn color="red darken-1"
-             flat
-             :disabled="btnDisabledCompu"
-             @click="$emit('cancel')">
+      <v-btn
+        color="red darken-1"
+        flat
+        :disabled="btnDisabledCompu"
+        @click="$emit('cancel')"
+      >
         Cancel
       </v-btn>
-      <v-btn color="green darken-1"
-             flat
-             :disabled="btnDisabledCompu"
-             @click="onContinue">
+      <v-btn
+        color="green darken-1"
+        flat
+        :disabled="btnDisabledCompu"
+        @click="onContinue"
+      >
         Continue
       </v-btn>
     </v-card-actions>
-    <DialogAddCat v-if="selected"
-                  :key-data="selected.key"
-                  :key-type="selected.keyType"
-                  :key-flag="selected.keyFlag"
-                  :val="selected.val"
-                  :val-type="selected.valType"
-                  :val-flag="selected.valFlag"
-                  :open-dialog="openDialogAddEdit"
-                  @cancel="onEditCancel"
-                  @save="onEditSave" />
-    <v-snackbar v-model="snackbarError"
-                :timeout="10000"
-                absolute
-                :bottom="true">
+    <DialogAddCat
+      v-if="selected"
+      :key-data="selected.key"
+      :key-type="selected.keyType"
+      :key-flag="selected.keyFlag"
+      :val="selected.val"
+      :val-type="selected.valType"
+      :val-flag="selected.valFlag"
+      :open-dialog="openDialogAddEdit"
+      @cancel="onEditCancel"
+      @save="onEditSave"
+    />
+    <v-snackbar
+      v-model="snackbarError"
+      :timeout="10000"
+      absolute
+      :bottom="true"
+    >
       Error: {{ snackbarMessage }}
-      <v-btn color="pink"
-             flat
-             @click="snackbarError = false">
-        Close
-      </v-btn>
+      <v-btn color="pink" flat @click="snackbarError = false"> Close </v-btn>
     </v-snackbar>
   </v-card>
 </template>
@@ -125,34 +125,34 @@ import {
   createInput,
   createCat,
   getModelByName,
-  getCatFromRvtModel
-} from "../../services/getObjFromRvtModel";
-import DialogAddCat from "./DialogAddCat.vue";
+  getCatFromRvtModel,
+} from '../../services/getObjFromRvtModel';
+import DialogAddCat from './DialogAddCat.vue';
 export default {
-  name: "AdvenceSettings",
+  name: 'AdvenceSettings',
   components: { DialogAddCat },
   props: {
-    modelName: { require: true, type: String, default: () => "" },
-    revitCat: { type: Array, required: true }
+    modelName: { require: true, type: String, default: () => '' },
+    revitCat: { type: Array, required: true },
   },
   data() {
     return {
       useCat: true,
-      catUsed: "",
+      catUsed: '',
       items: [],
       headers: [
         {
-          text: "Name",
-          align: "left",
-          value: "key"
+          text: 'Name',
+          align: 'left',
+          value: 'key',
         },
-        { text: "Value", value: "val" },
-        { text: "Actions", value: "name", sortable: false }
+        { text: 'Value', value: 'val' },
+        { text: 'Actions', value: 'name', sortable: false },
       ],
       modalStatus: null,
       openDialogAddEdit: false,
       selected: null,
-      snackbarError: false
+      snackbarError: false,
     };
   },
   watch: {
@@ -160,20 +160,20 @@ export default {
       if (this.modelName) {
         const model = getModelByName(this.modelName);
         this.catLst = await getCatFromRvtModel(model);
-        const catLstRes = this.catLst.filter(item =>
+        const catLstRes = this.catLst.filter((item) =>
           this.revitCat.includes(item)
         );
         if (catLstRes && catLstRes.length > 0) {
           this.catUsed = catLstRes[0];
         }
       }
-    }
+    },
   },
   methods: {
     printInput(keyType, name, flag) {
-      if (keyType === "e") return name;
-      if (keyType === "c") return `[${name}]`;
-      if (keyType === "r") {
+      if (keyType === 'e') return name;
+      if (keyType === 'c') return `[${name}]`;
+      if (keyType === 'r') {
         if (flag) return `/${name}/${flag}`;
         else return `/${name}/`;
       }
@@ -181,7 +181,7 @@ export default {
     onContinue() {
       try {
         const data = this.createData();
-        this.$emit("continue", data);
+        this.$emit('continue', data);
       } catch (e) {
         console.error(e);
         this.snackbarMessage = e.message;
@@ -194,7 +194,7 @@ export default {
       for (const item of this.items) {
         data.push({
           key: createInput(item.keyType, item.key, item.keyFlag),
-          value: createInput(item.valType, item.val, item.valFlag)
+          value: createInput(item.valType, item.val, item.valFlag),
         });
       }
       return data;
@@ -203,7 +203,7 @@ export default {
     onSeeList() {
       try {
         const data = this.createData();
-        this.$emit("seeList", data);
+        this.$emit('seeList', data);
       } catch (e) {
         console.error(e);
         this.snackbarMessage = e.message;
@@ -211,19 +211,19 @@ export default {
       }
     },
     addNewFilter() {
-      this.modalStatus = "new";
+      this.modalStatus = 'new';
       this.openDialogAddEdit = true;
       this.selected = {
-        key: "",
-        keyType: "e",
-        keyFlag: "",
-        val: "",
-        valType: "e",
-        valFlag: ""
+        key: '',
+        keyType: 'e',
+        keyFlag: '',
+        val: '',
+        valType: 'e',
+        valFlag: '',
       };
     },
     editItem(item) {
-      this.modalStatus = "edit";
+      this.modalStatus = 'edit';
       this.openDialogAddEdit = true;
       this.selected = item;
     },
@@ -236,22 +236,21 @@ export default {
     },
     onEditSave(data) {
       this.openDialogAddEdit = false;
-      if (this.modalStatus === "new") return this.items.push(data);
+      if (this.modalStatus === 'new') return this.items.push(data);
       this.selected.key = data.key;
       this.selected.keyType = data.keyType;
-      if (data.keyType === "r") this.selected.keyFlag = data.keyFlag;
-      else this.selected.keyFlag = "";
+      if (data.keyType === 'r') this.selected.keyFlag = data.keyFlag;
+      else this.selected.keyFlag = '';
 
       this.selected.val = data.val;
       this.selected.valType = data.valType;
-      if (data.valType === "r") this.selected.valFlag = data.valFlag;
-      else this.selected.valFlag = "";
+      if (data.valType === 'r') this.selected.valFlag = data.valFlag;
+      else this.selected.valFlag = '';
     },
     save() {},
     cancel() {},
     open() {},
-    close() {}
-  }
+    close() {},
+  },
 };
 </script>
-

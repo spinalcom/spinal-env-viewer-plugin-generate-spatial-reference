@@ -23,60 +23,61 @@ with this file. If not, see
 -->
 <template>
   <div>
-    <v-stepper v-show="!showTestList"
-               v-model="e1"
-               class="advenced-select-model-container spinal-scrollbar"
-               vertical>
-      <v-stepper-step step="1">
-        Basic parameters
-      </v-stepper-step>
+    <v-stepper
+      v-show="!showTestList"
+      v-model="e1"
+      class="advenced-select-model-container spinal-scrollbar"
+      vertical
+    >
+      <v-stepper-step step="1"> Basic parameters </v-stepper-step>
       <v-stepper-content step="1">
-        <Basicselectmodel :bimfiles="bimfiles"
-                          :btn-label="btnLabel"
-                          @continue="onBasicSelect">
-          <md-field>
-            <md-select v-model="configName"
-                       md-dense>
-              <md-option v-for="configName in configNames"
-                         :value="configName">
-                {{ configName }}
-              </md-option>
-            </md-select>
-          </md-field>
+        <Basicselectmodel
+          :bimfiles="bimfiles"
+          :btn-label="btnLabel"
+          @continue="onBasicSelect"
+        >
         </Basicselectmodel>
       </v-stepper-content>
 
-      <v-stepper-step step="2">
-        Levels
-      </v-stepper-step>
+      <v-stepper-step step="2"> Levels </v-stepper-step>
       <v-stepper-content step="2">
-        <AdvenceSettings :model-name="basic.selectedModel"
-                         :revit-cat="['Revit Level']"
-                         @seeList="seeTestList"
-                         @continue="onLevelSelect"
-                         @cancel="onCancel" />
+        <AdvenceSettings
+          :model-name="basic.selectedModel"
+          :revit-cat="['Revit Level']"
+          @seeList="seeTestList"
+          @continue="onLevelSelect"
+          @cancel="onCancel"
+        />
       </v-stepper-content>
 
-      <v-stepper-step step="3">
-        Rooms
-      </v-stepper-step>
+      <v-stepper-step step="3"> Rooms </v-stepper-step>
       <v-stepper-content step="3">
-        <AdvenceSettings :model-name="basic.selectedModel"
-                         :revit-cat="['Revit Pièces', 'Revit Rooms']"
-                         @seeList="seeTestList"
-                         @continue="onRoomSelect"
-                         @cancel="onCancel">
-          <v-checkbox v-model="isRoomRefOK"
-                      :label="`Use Rooms 3D as Reference.`" />
+        <AdvenceSettings
+          :model-name="basic.selectedModel"
+          :revit-cat="['Revit Pièces', 'Revit Rooms']"
+          @seeList="seeTestList"
+          @continue="onRoomSelect"
+          @cancel="onCancel"
+        >
+          <v-checkbox
+            v-model="isRoomRefOK"
+            :label="`Use Rooms 3D as Reference.`"
+          />
           <template v-if="isRoomRefOK">
-            <v-text-field v-model="floorRoomNbr"
-                          label="Attribut name of the Room's number in the Level." />
-            <v-text-field v-model="floorRoomName"
-                          label="Attribut name to rename the Room"
-                          placeholder="Optional" />
-            <v-text-field v-model="floorLevelName"
-                          label="Attribut name to rename the Level"
-                          placeholder="Optional" />
+            <v-text-field
+              v-model="floorRoomNbr"
+              label="Attribut name of the Room's number in the Level."
+            />
+            <v-text-field
+              v-model="floorRoomName"
+              label="Attribut name to rename the Room"
+              placeholder="Optional"
+            />
+            <v-text-field
+              v-model="floorLevelName"
+              label="Attribut name to rename the Level"
+              placeholder="Optional"
+            />
           </template>
         </AdvenceSettings>
       </v-stepper-content>
@@ -86,88 +87,95 @@ with this file. If not, see
           <small>Optional</small>
         </v-stepper-step>
         <v-stepper-content step="4">
-          <AdvenceSettings :model-name="basic.selectedModel"
-                           :revit-cat="['Revit Sols', 'Revit Floors']"
-                           @seeList="seeTestList"
-                           @continue="onFloorSelect"
-                           @cancel="onCancel">
-            <v-text-field v-model="floorRoomNbr"
-                          label="Attribut name of the Room's number in the Level." />
-            <v-text-field v-model="floorRoomName"
-                          label="Attribut name to rename the Room"
-                          placeholder="Optional" />
-            <v-text-field v-model="floorLevelName"
-                          label="Attribut name to rename the Level"
-                          placeholder="Optional" />
+          <AdvenceSettings
+            :model-name="basic.selectedModel"
+            :revit-cat="['Revit Sols', 'Revit Floors']"
+            @seeList="seeTestList"
+            @continue="onFloorSelect"
+            @cancel="onCancel"
+          >
+            <v-text-field
+              v-model="floorRoomNbr"
+              label="Attribut name of the Room's number in the Level."
+            />
+            <v-text-field
+              v-model="floorRoomName"
+              label="Attribut name to rename the Room"
+              placeholder="Optional"
+            />
+            <v-text-field
+              v-model="floorLevelName"
+              label="Attribut name to rename the Level"
+              placeholder="Optional"
+            />
           </AdvenceSettings>
         </v-stepper-content>
       </template>
 
-      <v-stepper-step :step="structureStep">
-        Structures
-      </v-stepper-step>
+      <v-stepper-step :step="structureStep"> Structures </v-stepper-step>
       <v-stepper-content :step="structureStep">
-        <AdvenceSettingStructure :model-name="basic.selectedModel"
-                                 @seeList="seeTestList"
-                                 @continue="onStructureSelect"
-                                 @cancel="onCancel" />
+        <AdvenceSettingStructure
+          :model-name="basic.selectedModel"
+          @seeList="seeTestList"
+          @continue="onStructureSelect"
+          @cancel="onCancel"
+        />
       </v-stepper-content>
-      <v-stepper-step :step="structureStep + 1">
-        Confirm
-      </v-stepper-step>
+      <v-stepper-step :step="structureStep + 1"> Confirm </v-stepper-step>
       <v-stepper-content :step="structureStep + 1">
-        <v-btn color="red darken-1"
-               flat
-               :disabled="btnDisabled"
-               @click="onCancel">
+        <v-btn
+          color="red darken-1"
+          flat
+          :disabled="btnDisabled"
+          @click="onCancel"
+        >
           Cancel
         </v-btn>
-        <v-btn color="primary"
-               :disabled="btnDisabled"
-               @click="onGenerate">
+        <v-btn color="primary" :disabled="btnDisabled" @click="onGenerate">
           Generate
         </v-btn>
       </v-stepper-content>
     </v-stepper>
-    <div v-if="showTestList"
-         class="test-popover spinal-scrollbar">
-      <ShowTestList :items="testItems"
-                    :model-name="basic.selectedModel"
-                    @close="showTestList = false" />
+    <div v-if="showTestList" class="test-popover spinal-scrollbar">
+      <ShowTestList
+        :items="testItems"
+        :model-name="basic.selectedModel"
+        @close="showTestList = false"
+      />
     </div>
   </div>
 </template>
 
 <script>
-import Basicselectmodel from "../BasicSelectModel.vue";
-import ShowTestList from "../showTestList.vue";
-import AdvenceSettings from "./AdvenceSettings.vue";
-import AdvenceSettingStructure from "./AdvenceSettingStructure.vue";
+import Basicselectmodel from '../BasicSelectModel.vue';
+import ShowTestList from '../showTestList.vue';
+import AdvenceSettings from './AdvenceSettings.vue';
+import AdvenceSettingStructure from './AdvenceSettingStructure.vue';
 
 AdvenceSettings;
 import {
   getObjFromRvtModel,
-  getModelByName
-} from "../../services/getObjFromRvtModel";
+  getModelByName,
+} from '../../services/getObjFromRvtModel';
 
 export default {
-  name: "AdvencedSelectModel",
+  name: 'AdvencedSelectModel',
   components: {
     Basicselectmodel,
     AdvenceSettings,
     AdvenceSettingStructure,
-    ShowTestList
+    ShowTestList,
   },
   props: {
     bimfiles: { require: true, type: Array, default: () => [] },
-    btnLabel: { type: String, default: () => "Continue" },
+    btnLabel: { type: String, default: () => 'Continue' },
     btnDisabled: { type: Boolean, default: () => false },
-    configNames: { require: true, type: Array, default: () => [] }
+    configNames: { require: true, type: Array, default: () => [] },
   },
   data() {
     return {
-      firstname: "test",
-      configName: "default",
+      firstname: 'test',
+      configName: 'default',
       advenced: [],
       e1: 1,
       isRoomRefOK: true,
@@ -178,15 +186,15 @@ export default {
       floorSelect: [],
       structureSelect: [],
       testItems: [],
-      floorRoomNbr: "Number",
-      floorRoomName: "",
-      floorLevelName: ""
+      floorRoomNbr: 'Number',
+      floorRoomName: '',
+      floorLevelName: '',
     };
   },
   computed: {
     structureStep() {
       return this.isRoomRefOK ? 4 : 5;
-    }
+    },
   },
   methods: {
     onCancel() {
@@ -218,7 +226,7 @@ export default {
         basic: this.basic,
         levelSelect: this.createData(this.levelSelect),
         roomSelect: this.createData(this.roomSelect),
-        structureSelect: this.createData(this.structureSelect)
+        structureSelect: this.createData(this.structureSelect),
       };
       if (this.isRoomRefOK === false) {
         Object.assign(cfg, { floorSelect: this.createData(this.floorSelect) });
@@ -233,14 +241,14 @@ export default {
         Object.assign(cfg, { floorLevelName: this.floorLevelName });
       }
 
-      this.$emit("onGenerate", cfg);
+      this.$emit('onGenerate', cfg);
     },
     createData(lstObj) {
       const res = [];
       for (const d of lstObj) {
         const obj = {
           key: d.key.toString(),
-          value: d.value.toString()
+          value: d.value.toString(),
         };
         if (d.isCat === true) Object.assign(obj, { isCat: true });
         res.push(obj);
@@ -250,15 +258,13 @@ export default {
     async seeTestList(dataRegexp) {
       const model = getModelByName(this.basic.selectedModel);
       this.testItems = await getObjFromRvtModel(model, dataRegexp);
-
-      console.log("this.testItems", this.testItems);
       this.showTestList = true;
-    }
-  }
+    },
+  },
 };
 </script>
 
-<style >
+<style>
 .advenced-select-model-container {
   height: 100%;
   overflow-y: auto;
