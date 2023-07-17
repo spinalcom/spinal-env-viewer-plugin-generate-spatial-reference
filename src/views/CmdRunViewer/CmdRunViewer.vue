@@ -52,6 +52,18 @@ with this file. If not, see
         >Start</md-button
       >
     </md-dialog-actions>
+
+    <md-snackbar
+      md-position="left"
+      :md-duration="4000"
+      :md-active.sync="snackbarError"
+      md-persistent
+    >
+      <span> Error: {{ snackbarMessage }}</span>
+      <md-button class="md-primary" @click="snackbarError = false"
+        >Close</md-button
+      >
+    </md-snackbar>
   </md-dialog>
 </template>
 
@@ -75,6 +87,8 @@ const CmdRunViewer = {
       loading: false,
       mode: '',
       status: 0,
+      snackbarError: false,
+      snackbarMessage: '',
     };
   },
   methods: {
@@ -101,10 +115,16 @@ const CmdRunViewer = {
           }
         } catch (error) {
           console.error(error);
+          this.snackbarError = true;
+          this.snackbarMessage = error;
         } finally {
           this.loading = false;
         }
-      } else console.error('CmdRunViewer opened without an option');
+      } else {
+        this.snackbarError = true;
+        this.snackbarMessage = 'CmdRunViewer opened without an option';
+        console.error('CmdRunViewer opened without an option');
+      }
     },
     async start() {
       this.loading = true;
@@ -120,6 +140,8 @@ const CmdRunViewer = {
         }
       } catch (error) {
         console.error(error);
+        this.snackbarError = true;
+        this.snackbarMessage = 'Generation Error, please retry';
       } finally {
         this.loading = false;
         this.closeDialog();
@@ -144,6 +166,11 @@ const CmdRunViewer = {
     },
     closeDialog(closeResult) {
       if (typeof this.onFinised === 'function') this.onFinised();
+    },
+  },
+  watch: {
+    showDialog() {
+      if (this.showDialog === false) this.closeDialog();
     },
   },
 };
