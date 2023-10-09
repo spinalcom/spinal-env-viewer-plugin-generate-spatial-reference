@@ -137,8 +137,7 @@ export default SpinalDiffViewer;
 .plugin-graph-viewer {
   position: relative;
 }
-.plugin-graph-viewer
-  > .spinal-modal-container:has(.SpinalDiffViewer-container) {
+.plugin-graph-viewer > .spinal-modal-container {
   position: absolute;
   top: 0;
   left: 0;
