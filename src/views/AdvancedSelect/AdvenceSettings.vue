@@ -156,7 +156,15 @@ export default {
     };
   },
   watch: {
-    async modelName() {
+    modelName() {
+      return this.updateModelName();
+    },
+  },
+  mounted() {
+    return this.updateModelName();
+  },
+  methods: {
+    async updateModelName() {
       if (this.modelName) {
         const model = getModelByName(this.modelName);
         this.catLst = await getCatFromRvtModel(model);
@@ -168,8 +176,6 @@ export default {
         }
       }
     },
-  },
-  methods: {
     printInput(keyType, name, flag) {
       if (keyType === 'e') return name;
       if (keyType === 'c') return `[${name}]`;

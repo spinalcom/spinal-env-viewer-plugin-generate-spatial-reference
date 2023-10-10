@@ -34,12 +34,11 @@ with this file. If not, see
           multiple
           md-dense
         >
-          <md-option v-for="cat in catLst" :value="cat">
+          <md-option v-for="cat in catLst" :key="cat" :value="cat">
             {{ cat }}
           </md-option>
         </md-select>
       </md-field>
-
       <v-data-table :headers="headers" :items="items">
         <template v-slot:items="props">
           <td>
@@ -160,7 +159,15 @@ export default {
     };
   },
   watch: {
-    async modelName() {
+    modelName() {
+      return this.updateModelName();
+    },
+  },
+  mounted() {
+    return this.updateModelName();
+  },
+  methods: {
+    async updateModelName() {
       if (this.modelName) {
         const model = getModelByName(this.modelName);
         this.catLst = await getCatFromRvtModel(model);
@@ -175,8 +182,6 @@ export default {
         this.catLstRes = this.catLst.filter((item) => register.includes(item));
       }
     },
-  },
-  methods: {
     printInput(keyType, name, flag) {
       if (keyType === 'e') return name;
       if (keyType === 'c') return `[${name}]`;
@@ -255,10 +260,6 @@ export default {
       if (data.valType === 'r') this.selected.valFlag = data.valFlag;
       else this.selected.valFlag = '';
     },
-    save() {},
-    cancel() {},
-    open() {},
-    close() {},
   },
 };
 </script>
