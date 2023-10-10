@@ -100,7 +100,7 @@ import {
   selectDbId,
   fitToViewtDbIds,
 } from '../services/dbIdUtils';
-import { getModelByName } from '../services/getObjFromRvtModel';
+import { escapeRegExp, getModelByName } from '../services/getObjFromRvtModel';
 import BtnTooltip from '../viewUtils/BtnTooltip.vue';
 
 const NBR_ITEMS = 15;
@@ -164,7 +164,7 @@ export default {
       if (this.openSearch === true && this.searchQuery !== '') {
         let query = '';
         try {
-          query = RegExp.escape(this.searchQuery);
+          query = escapeRegExp(this.searchQuery);
         } catch (e) {
           query = this.searchQuery;
         }

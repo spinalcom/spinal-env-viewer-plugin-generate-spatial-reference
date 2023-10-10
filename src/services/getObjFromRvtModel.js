@@ -101,9 +101,13 @@ export function getCatFromRvtModel(model) {
   return model.getPropertyDb().executeUserFunction(fct);
 }
 
+export function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 export function createInput(type, name, regflag = "") {
-  if (type === 'e') return new RegExp("^" + RegExp.escape(name) + "$", regflag);
-  if (type === 'c') return new RegExp(RegExp.escape(name), regflag);
+  if (type === 'e') return new RegExp("^" + escapeRegExp(name) + "$", regflag);
+  if (type === 'c') return new RegExp(escapeRegExp(name), regflag);
   if (type === 'r') return new RegExp(name, regflag);
 }
 export function createCat(value) {
