@@ -34,12 +34,47 @@ with this file. If not, see
           name="modelselect"
           md-dense
         >
-          <md-option v-for="bimfile in bimfiles" :value="bimfile">
+          <md-option
+            v-for="(bimfile, idx) in bimfiles"
+            :key="idx"
+            :value="bimfile"
+          >
             {{ bimfile }}
           </md-option>
         </md-select>
       </md-field>
-      <md-field>
+      <md-checkbox v-model="isRawData">Mode Raw Data</md-checkbox>
+
+      <md-field v-if="isRawData">
+        <label for="context select">Select a BIM Geo Context</label>
+        <md-select
+          id="context select"
+          v-model="contextSelectedValue"
+          name="context select"
+          md-dense
+          class="context-select"
+        >
+          <md-option
+            v-for="context in contexts"
+            :key="context.value"
+            :value="context.value"
+          >
+            {{ context.label }}
+          </md-option>
+        </md-select>
+        <md-button
+          class="md-icon-button"
+          md-dense
+          @click="
+            newcontextValue = '';
+            openDialogNewcontext = true;
+          "
+        >
+          <md-icon>add</md-icon>
+        </md-button>
+      </md-field>
+
+      <md-field v-else>
         <label for="building select">select the building</label>
         <md-select
           id="building select"
@@ -82,11 +117,20 @@ with this file. If not, see
     <md-dialog-prompt
       :md-active.sync="openDialogNewBuilding"
       v-model="newBuildingValue"
-      :md-title="title"
-      md-input-maxlength="30"
+      md-title="building name"
+      md-input-maxlength="100"
       md-input-placeholder="Type the building name..."
       md-confirm-text="Done"
       @md-confirm="onAcceptNewBuilding(newBuildingValue)"
+    />
+    <md-dialog-prompt
+      :md-active.sync="openDialogNewcontext"
+      v-model="newContextValue"
+      md-title="context name"
+      md-input-maxlength="50"
+      md-input-placeholder="Type the Context name..."
+      md-confirm-text="Done"
+      @md-confirm="onAcceptNewContext(newContextValue)"
     />
   </v-card>
 </template>
@@ -96,6 +140,8 @@ import {
   getContextSpatial,
   getGraph,
   waitGetServerId,
+  getBimGeoContexts,
+  createBIMGeoContext,
 } from 'spinal-spatial-referential';
 import geoService from 'spinal-env-viewer-context-geographic-service';
 
@@ -110,11 +156,16 @@ export default {
     return {
       addLevel: false,
       selectedModel: null,
-      newBuildingValue: '',
       manualAssingment: new Map(),
+      newBuildingValue: '',
       openDialogNewBuilding: false,
-      buildings: [],
       buildingSelectedValue: null,
+      buildings: [],
+      isRawData: false,
+      newContextValue: '',
+      openDialogNewcontext: false,
+      contextSelectedValue: null,
+      contexts: [],
     };
   },
   computed: {
@@ -122,29 +173,53 @@ export default {
       return (
         this.btnDisabled ||
         this.selectedModel === null ||
-        !this.buildingSelectedValue
+        !(this.buildingSelectedValue || this.contextSelectedValue)
       );
     },
   },
   mounted() {
     return this.getBuildings();
   },
+  watch: {
+    isRawData() {
+      if (this.isRawData === false) {
+        return this.getBuildings();
+      } else {
+        return this.getBimGeoContexts();
+      }
+    },
+  },
   methods: {
     onModelSelected(value) {
       this.selectedModel = value;
     },
     async getBuildings() {
-      const graph = getGraph();
-      const contextGeo = await getContextSpatial(graph);
-      const buildings = await contextGeo.getChildrenInContext(contextGeo);
-      this.buildings = buildings.map((itm) => {
-        return {
-          label: itm.info.name.get(),
-          value: itm._server_id,
-        };
-      });
-      if (this.buildings.length === 1)
-        this.buildingSelectedValue = this.buildings[0].value;
+      if (this.isRawData === false) {
+        const graph = getGraph();
+        const contextGeo = await getContextSpatial(graph);
+        const buildings = await contextGeo.getChildrenInContext(contextGeo);
+        this.buildings = buildings.map((itm) => {
+          return {
+            label: itm.info.name.get(),
+            value: itm._server_id,
+          };
+        });
+        if (this.buildings.length === 1)
+          this.buildingSelectedValue = this.buildings[0].value;
+      }
+    },
+    async getBimGeoContexts() {
+      if (this.isRawData === true) {
+        const contexts = await getBimGeoContexts();
+        this.contexts = contexts.map((itm) => {
+          return {
+            label: itm.info.name.get(),
+            value: itm._server_id,
+          };
+        });
+        if (this.contexts.length === 1)
+          this.contextSelectedValue = this.contexts[0].value;
+      }
     },
     async onAcceptNewBuilding(buildingName) {
       const graph = getGraph();
@@ -157,10 +232,17 @@ export default {
       await waitGetServerId(node);
       return this.getBuildings();
     },
+    async onAcceptNewContext(contextName) {
+      const context = await createBIMGeoContext(contextName);
+      await waitGetServerId(context);
+      return this.getBimGeoContexts();
+    },
     onContinue() {
       this.$emit('continue', {
-        buildingServId: this.buildingSelectedValue,
+        isRawData: this.isRawData,
         selectedModel: this.selectedModel,
+        buildingServId: this.buildingSelectedValue,
+        BIMGeocontextServId: this.contextSelectedValue,
       });
     },
   },

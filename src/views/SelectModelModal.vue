@@ -80,6 +80,8 @@ with this file. If not, see
         :archiData="archiData"
         :buildingServerId="buildingServId"
         :bimFileId="bimFileId"
+        :isRawDataGen="isRawDataGen"
+        :BIMGeocontextServId="BIMGeocontextServId"
       ></SpatialDiffSettings>
       <md-dialog :md-active.sync="showDialog">
         <md-dialog-title>Choose which bimFile to update</md-dialog-title>
@@ -94,6 +96,14 @@ with this file. If not, see
               >
             </md-select>
           </md-field>
+          <v-checkbox
+            v-model="updateBimobjectsName"
+            label="update bimobjects name"
+          ></v-checkbox>
+          <v-checkbox
+            v-model="updateBimobjectsDbid"
+            label="update bimobjects dbid"
+          ></v-checkbox>
         </md-dialog-content>
         <md-dialog-actions>
           <md-button class="md-primary" @click="showDialog = false"
@@ -134,7 +144,7 @@ import {
   getGraph,
   getArchi,
   transformArchi,
-  updateDbIds,
+  updateBimObjectFromBimFileId,
   updateRoomDbId,
   loadBimFile,
   setLevelInContextGeo,
@@ -156,6 +166,8 @@ export default {
       hideDiffSettings: true,
       archiData: null,
       buildingServId: NaN,
+      isRawDataGen: false,
+      BIMGeocontextServId: NaN,
       selectedModel: null,
       selectedModelModal: null,
       showDialog: false,
@@ -164,7 +176,7 @@ export default {
       durationSnakebar: Infinity,
       scripts: [
         { divider: true, title: 'Script before update' },
-        { title: 'Update dbids from externalIds', fct: this.updateDbIds },
+        { title: 'Update bimobjects from externalIds', fct: this.updateDbIds },
         {
           title: "Update Room's dbid attribute information",
           fct: this.updateRoomDbId,
@@ -183,6 +195,8 @@ export default {
           fct: this.setCenterPosInContextGeo,
         },
       ],
+      updateBimobjectsName: true,
+      updateBimobjectsDbid: true,
     };
   },
   computed: {
@@ -198,9 +212,7 @@ export default {
     },
   },
   async mounted() {
-    // this.manager = new SM.default.SpatialManager();
     const graph = getGraph();
-
     let context = await graph.getContext('BimFileContext');
     if (!context) return;
     addNodeGraphService(context);
@@ -224,7 +236,12 @@ export default {
           const bimFileNode = this.models[i];
           if (this.selectedModelModal.includes(bimFileNode.info.name.get())) {
             const model = await loadBimFile(bimFileNode, viewer);
-            await updateDbIds(bimFileNode.info.id.get(), model);
+            await updateBimObjectFromBimFileId(
+              bimFileNode.info.id.get(),
+              model,
+              this.updateBimobjectsName,
+              this.updateBimobjectsDbid
+            );
           }
         }
       } catch (e) {
@@ -290,7 +307,9 @@ export default {
         console.log('get Archi Done', archi);
         this.archiData = archi;
         this.hideDiffSettings = false;
+        this.isRawDataGen = opt.isRawData;
         this.buildingServId = opt.buildingServId;
+        this.BIMGeocontextServId = opt.BIMGeocontextServId;
       } catch (e) {
         console.error(e);
       } finally {
@@ -303,9 +322,8 @@ export default {
       spatialConfig.saveConfig(cfg);
       await this.generate(cfg.basic);
     },
-    opened() {
-      this.dialog = true;
-    },
+
+    opened() {},
     removed() {},
     close() {},
     closeDialog() {},

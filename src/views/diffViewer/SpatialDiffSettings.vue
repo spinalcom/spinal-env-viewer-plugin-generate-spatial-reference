@@ -220,11 +220,15 @@ with this file. If not, see
 </template>
 
 <script>
-import { EModificationType, getGraph } from 'spinal-spatial-referential';
 import {
-  diffFloorWithContextGeo,
-  getContextSpatial,
-  floorArchiHasChildren,
+  EModificationType,
+  getFloorNodesFromGeo,
+  getFloorNodesFromBIMGeo,
+  getRoomNodesFromFloor,
+  getRoomNodesFromBIMGeo,
+  diffArchiWithContextGeo,
+  diffArchiWithContextBIMGeo,
+  parseUnit,
 } from 'spinal-spatial-referential';
 import { eventBus } from './eventbus';
 import SpinalTableDiffInfo from './SpinalTableDiffInfo.vue';
@@ -234,12 +238,17 @@ import SpinalTableRoomUpdate from './SpinalTableRoomUpdate.vue';
 import SpinalTableStructNew from './SpinalTableStructNew.vue';
 import SpinalTableRoomUpdateDetails from './SpinalTableRoomUpdateDetails.vue';
 import SpinalRoomNew from './SpinalRoomNew.vue';
-import { parseUnit } from 'spinal-spatial-referential';
 import BtnGroupViewInViewer from './BtnGroupViewInViewer.vue';
 
 export default {
   name: 'SpatialDiffSettings',
-  props: ['archiData', 'buildingServerId', 'bimFileId'],
+  props: [
+    'archiData',
+    'bimFileId',
+    'isRawDataGen',
+    'buildingServerId',
+    'BIMGeocontextServId',
+  ],
   components: {
     SpinalTableDiffInfo,
     SpinalTableDel,
@@ -324,47 +333,70 @@ export default {
       this.modeView = 'floor';
       this.roomData = null;
       this.FAData = FAData;
-      const graph = getGraph();
-      const contextGeo = await getContextSpatial(graph);
       this.manualAssingmentSelection = 0;
       this.manualAssingmentSelectionTmp = 0;
       this.manualAssingmentChoice = [{ label: 'none', value: 0 }];
-      const buildings = await contextGeo.getChildrenInContext(contextGeo);
-      const buildingsFloors = await Promise.all(
-        buildings.map((building) => {
-          if (building._server_id === this.buildingServerId)
-            return building.getChildrenInContext(contextGeo);
-        })
-      );
       const servId = this.manualAssingment.get(
         FAData.floorArchi.properties.externalId
       );
-      for (const buildingFloor of buildingsFloors) {
-        if (buildingFloor) {
-          for (const floorNode of buildingFloor) {
-            const data = {
-              label: floorNode.info.name.get(),
-              value: floorNode._server_id,
-            };
-            if (servId === floorNode._server_id) {
-              this.manualAssingmentSelection = data.value;
-              this.manualAssingmentSelectionTmp = data.value;
-            }
-            this.manualAssingmentChoice.push(data);
-          }
+      console.log('isRawDataGen', this.isRawDataGen);
+      console.log('buildingServerId', this.buildingServerId);
+      console.log('BIMGeocontextServId', this.BIMGeocontextServId);
+      const floorNodes = this.isRawDataGen
+        ? await getFloorNodesFromBIMGeo(this.BIMGeocontextServId)
+        : await getFloorNodesFromGeo(this.buildingServerId);
+      console.log('2');
+      for (const floorNode of floorNodes) {
+        const data = {
+          label: floorNode.info.name.get(),
+          value: floorNode._server_id,
+        };
+        if (servId === floorNode._server_id) {
+          this.manualAssingmentSelection = data.value;
+          this.manualAssingmentSelectionTmp = data.value;
         }
+        this.manualAssingmentChoice.push(data);
       }
     },
+    // async onSelectFloorNoRawData(FAData) {
+    //   const graph = getGraph();
+    //   const contextGeo = await getContextSpatial(graph);
+    //   const buildings = await contextGeo.getChildrenInContext(contextGeo);
+    //   const buildingsFloors = await Promise.all(
+    //     buildings.map((building) => {
+    //       if (building._server_id === this.buildingServerId)
+    //         return building.getChildrenInContext(contextGeo);
+    //     })
+    //   );
+    //   const servId = this.manualAssingment.get(
+    //     FAData.floorArchi.properties.externalId
+    //   );
+    //   for (const buildingFloor of buildingsFloors) {
+    //     if (buildingFloor) {
+    //       for (const floorNode of buildingFloor) {
+    //         const data = {
+    //           label: floorNode.info.name.get(),
+    //           value: floorNode._server_id,
+    //         };
+    //         if (servId === floorNode._server_id) {
+    //           this.manualAssingmentSelection = data.value;
+    //           this.manualAssingmentSelectionTmp = data.value;
+    //         }
+    //         this.manualAssingmentChoice.push(data);
+    //       }
+    //     }
+    //   }
+    // },
     async onSelectRoom({ FAData, RAData, type }) {
       this.roomData = null;
       this.modeView = 'room' + type;
       this.selected = [];
       this.FAData = FAData;
       if (type === 'update') {
-        this.onSelectRoomSetAssing(FAData, RAData.roomArchi.properties);
+        await this.onSelectRoomSetAssing(FAData, RAData.roomArchi.properties);
         this.roomData = this.getProps(RAData.roomArchi.properties, RAData.diff);
       } else if (type === 'new') {
-        this.onSelectRoomSetAssing(FAData, RAData.properties);
+        await this.onSelectRoomSetAssing(FAData, RAData.properties);
         const room = this.getPropsNew(RAData.properties);
         room.children = [];
         for (const structure of RAData.children) {
@@ -424,69 +456,87 @@ export default {
       return props;
     },
     async onSelectRoomSetAssing(FAData, RADataProperties) {
-      const graph = getGraph();
-      const contextGeo = await getContextSpatial(graph);
       this.manualAssingmentSelection = 0;
       this.manualAssingmentSelectionTmp = 0;
       this.manualAssingmentChoice = [{ label: 'none', value: 0 }];
-      const buildings = await contextGeo.getChildrenInContext(contextGeo);
-      const buildingsFloors = await Promise.all(
-        buildings.map(async (building) => {
-          if (building._server_id === this.buildingServerId) {
-            const floors = await building.getChildrenInContext(contextGeo);
-            for (const floor of floors) {
-              if (
-                floor._server_id ===
-                FAData.floorArchi.properties.spinalnodeServerId
-              ) {
-                return floor.getChildrenInContext(contextGeo);
-              }
-            }
-          }
-        })
-      );
       let roomServId = this.manualAssingment.get(RADataProperties.externalId);
-      for (const buildingRoom of buildingsFloors) {
-        if (buildingRoom) {
-          for (const roomNode of buildingRoom) {
-            if (!roomNode) continue;
-            const data = {
-              label: roomNode.info.name.get(),
-              value: roomNode._server_id,
-            };
-            if (roomServId === roomNode._server_id) {
-              this.manualAssingmentSelection = data.value;
-              this.manualAssingmentSelectionTmp = data.value;
-            }
-            this.manualAssingmentChoice.push(data);
-          }
+      const roomNodes = this.isRawDataGen
+        ? await getRoomNodesFromBIMGeo(this.BIMGeocontextServId)
+        : await getRoomNodesFromFloor(
+            FAData.floorArchi.properties.spinalnodeServerId
+          );
+      for (const roomNode of roomNodes) {
+        const data = {
+          label: roomNode.info.name.get(),
+          value: roomNode._server_id,
+        };
+        if (roomServId === roomNode._server_id) {
+          this.manualAssingmentSelection = data.value;
+          this.manualAssingmentSelectionTmp = data.value;
         }
+        this.manualAssingmentChoice.push(data);
       }
     },
+    // async onSelectRoomSetAssing(FAData, RADataProperties) {
+    //       this.manualAssingmentSelection = 0;
+    //       this.manualAssingmentSelectionTmp = 0;
+    //       this.manualAssingmentChoice = [{ label: 'none', value: 0 }];
+    //       const graph = getGraph();
+    //       const contextGeo = await getContextSpatial(graph);
+    //       const buildings = await contextGeo.getChildrenInContext(contextGeo);
+    //       const buildingsFloors = await Promise.all(
+    //         buildings.map(async (building) => {
+    //           if (building._server_id === this.buildingServerId) {
+    //             const floors = await building.getChildrenInContext(contextGeo);
+    //             for (const floor of floors) {
+    //               if (
+    //                 floor._server_id ===
+    //                 FAData.floorArchi.properties.spinalnodeServerId
+    //               ) {
+    //                 return floor.getChildrenInContext(contextGeo);
+    //               }
+    //             }
+    //           }
+    //         })
+    //       );
+    //       let roomServId = this.manualAssingment.get(RADataProperties.externalId);
+    //       for (const buildingRoom of buildingsFloors) {
+    //         if (buildingRoom) {
+    //           for (const roomNode of buildingRoom) {
+    //             if (!roomNode) continue;
+    //             const data = {
+    //               label: roomNode.info.name.get(),
+    //               value: roomNode._server_id,
+    //             };
+    //             if (roomServId === roomNode._server_id) {
+    //               this.manualAssingmentSelection = data.value;
+    //               this.manualAssingmentSelectionTmp = data.value;
+    //             }
+    //             this.manualAssingmentChoice.push(data);
+    //           }
+    //         }
+    //       }
+    //     },
     async update() {
-      if (!this.buildingServerId) return;
+      if (!(this.buildingServerId || this.BIMGeocontextServId)) return;
       this.modeView = '';
       this.roomData = null;
-      const graph = getGraph();
-      const contextGeo = await getContextSpatial(graph);
-      const archiData = [];
-      for (const extId in this.archiData) {
-        if (Object.hasOwnProperty.call(this.archiData, extId)) {
-          const floorArchi = this.archiData[extId];
-          if (floorArchiHasChildren(floorArchi)) {
-            const diff = await diffFloorWithContextGeo(
-              floorArchi,
-              contextGeo,
-              this.buildingServerId,
-              this.manualAssingment
-            );
-            archiData.push({ diff, floorArchi });
-          }
-        }
-      }
+      const archiData = this.isRawDataGen
+        ? await diffArchiWithContextBIMGeo(
+            this.archiData,
+            this.BIMGeocontextServId,
+            this.manualAssingment
+          )
+        : await diffArchiWithContextGeo(
+            this.archiData,
+            this.buildingServerId,
+            this.manualAssingment
+          );
       spinal.spinalPanelManagerService.openPanel('SpinalDiffViewer', {
         archiData,
         manualAssingment: this.manualAssingment,
+        isRawDataGen: this.isRawDataGen,
+        BIMGeocontextServId: this.BIMGeocontextServId,
         buildingServerId: this.buildingServerId,
         bimFileId: this.bimFileId,
       });

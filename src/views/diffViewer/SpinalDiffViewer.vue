@@ -51,6 +51,7 @@ import {
   saveCmdsGenerateGeo,
   addNodeGraphService,
   waitPathSendToHub,
+  generateCmdBIMGeo,
 } from 'spinal-spatial-referential';
 const SpinalDiffViewer = {
   name: 'SpinalDiffViewer',
@@ -73,6 +74,8 @@ const SpinalDiffViewer = {
         this.manualAssingment = option.manualAssingment;
         this.buildingServerId = option.buildingServerId;
         this.bimFileId = option.bimFileId;
+        this.isRawDataGen = option.isRawDataGen;
+        this.BIMGeocontextServId = option.BIMGeocontextServId;
       }
     },
     removed(option) {
@@ -90,12 +93,19 @@ const SpinalDiffViewer = {
     async generate() {
       this.loading = true;
       try {
-        const cmds = await generateCmdGeo(
-          this.archiData,
-          this.skipList,
-          this.buildingServerId,
-          this.bimFileId
-        );
+        const cmds = this.isRawDataGen
+          ? await generateCmdBIMGeo(
+              this.archiData,
+              this.skipList,
+              this.BIMGeocontextServId,
+              this.bimFileId
+            )
+          : await generateCmdGeo(
+              this.archiData,
+              this.skipList,
+              this.buildingServerId,
+              this.bimFileId
+            );
         const { node, context, data } = await saveCmdsGenerateGeo(cmds);
         addNodeGraphService(node);
         await waitPathSendToHub(data);

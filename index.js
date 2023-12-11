@@ -39,6 +39,7 @@ import { GenerateContextGeo } from "./src/buttons/RunGeneration";
 import { ManualAssingmentButton } from "./src/buttons/ManualAssingment";
 import "./src/views/diffViewer/index";
 import "./src/views/CmdRunViewer/index";
+import "./src/views/MergeBimGeo";
 export const TOP_BAR_HOOK_NAME = 'GraphManagerTopBar';
 const SIDE_BAR_HOOK_NAME = "GraphManagerSideBar";
 
