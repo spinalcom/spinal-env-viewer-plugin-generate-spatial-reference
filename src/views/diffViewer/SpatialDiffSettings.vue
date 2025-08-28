@@ -345,7 +345,6 @@ export default {
       const floorNodes = this.isRawDataGen
         ? await getFloorNodesFromBIMGeo(this.BIMGeocontextServId)
         : await getFloorNodesFromGeo(this.buildingServerId);
-      console.log('2');
       for (const floorNode of floorNodes) {
         const data = {
           label: floorNode.info.name.get(),

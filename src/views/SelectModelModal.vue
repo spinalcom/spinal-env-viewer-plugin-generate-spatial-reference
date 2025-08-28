@@ -81,6 +81,7 @@ with this file. If not, see
         :buildingServerId="buildingServId"
         :bimFileId="bimFileId"
         :isRawDataGen="isRawDataGen"
+        :isFloorOnlyImport="isFloorOnlyImport"
         :BIMGeocontextServId="BIMGeocontextServId"
       ></SpatialDiffSettings>
       <md-dialog :md-active.sync="showDialog">
@@ -153,7 +154,14 @@ import {
   addNodeGraphService,
   getViewer,
   loadConfig,
+  getArchiFloorOnly,
+  getLevelsWithAssignedStructures,
+  createCmdFloorOnlyImport,
+  waitPathSendToHub,
+  saveCmdsGenerateGeo,
 } from 'spinal-spatial-referential';
+import { getModelByName } from '../services/getObjFromRvtModel';
+import { FileSystem } from 'spinal-core-connectorjs';
 export default {
   name: 'DialogGenerateContext',
   components: { Basicselectmodel, AdvencedSelectModel, SpatialDiffSettings },
@@ -167,6 +175,7 @@ export default {
       archiData: null,
       buildingServId: NaN,
       isRawDataGen: false,
+      isFloorOnlyImport: false,
       BIMGeocontextServId: NaN,
       selectedModel: null,
       selectedModelModal: null,
@@ -296,20 +305,25 @@ export default {
     },
     async generate(opt) {
       this.spin = true;
-      const graph = getGraph();
       try {
+        console.log('generate with opt', opt);
         this.selectedModel = opt.selectedModel;
+        const graph = getGraph();
         const bimFile = this.getBimFile();
-        const viewer = getViewer();
-        console.log('start load bimfile');
-        const archi = await getArchi(graph, this.configName, bimFile, viewer);
-        transformArchi(archi);
-        console.log('get Archi Done', archi);
-        this.archiData = archi;
-        this.hideDiffSettings = false;
-        this.isRawDataGen = opt.isRawData;
-        this.buildingServId = opt.buildingServId;
-        this.BIMGeocontextServId = opt.BIMGeocontextServId;
+        if (opt.isFloorOnlyImport) {
+          await this.generateFloorOnly(opt, bimFile, graph);
+        } else {
+          console.log('start load bimfile');
+          const viewer = getViewer();
+          const archi = await getArchi(graph, this.configName, bimFile, viewer);
+          transformArchi(archi);
+          console.log('get Archi Done', archi);
+          this.archiData = archi;
+          this.hideDiffSettings = false;
+          this.isRawDataGen = opt.isRawData;
+          this.buildingServId = opt.buildingServId;
+          this.BIMGeocontextServId = opt.BIMGeocontextServId;
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -321,6 +335,47 @@ export default {
       const spatialConfig = await loadConfig(graph);
       spatialConfig.saveConfig(cfg);
       await this.generate(cfg.basic);
+    },
+
+    async generateFloorOnly(opt, bimFile, graph) {
+      console.log('start generateFloorOnly', opt);
+      if (!opt.levelSelect || !opt.structureSelect) {
+        const configModel = await loadConfig(graph);
+        const config = configModel.getConfig(this.configName);
+        opt.levelSelect = config.levelSelect.get();
+        opt.structureSelect = config.structureSelect.get();
+      }
+      const cfgFloor = opt.levelSelect;
+      const cfgFloorStructure = opt.structureSelect;
+      let model = getModelByName(this.selectedModel);
+      if (!model) {
+        const viewer = getViewer();
+        model = await loadBimFile(bimFile, viewer);
+      }
+      const floorsdata = await getArchiFloorOnly(
+        model,
+        cfgFloor,
+        cfgFloorStructure
+      );
+      const structs = floorsdata.structures.filter((structData) => {
+        return model.isNodeExists(structData.dbId);
+      });
+      floorsdata.structures = structs;
+      const levels = getLevelsWithAssignedStructures(floorsdata);
+
+      const cmds = await createCmdFloorOnlyImport(
+        FileSystem._objects[opt.BIMGeocontextServId],
+        levels,
+        bimFile.info.id.get()
+      );
+      const { node, context, data } = await saveCmdsGenerateGeo(cmds);
+      addNodeGraphService(node);
+      await waitPathSendToHub(data);
+      spinal.spinalPanelManagerService.openPanel('CmdRunViewer', {
+        dataCmd: cmds,
+        node,
+        contextId: context.info.id.get(),
+      });
     },
 
     opened() {},

@@ -49,67 +49,68 @@ with this file. If not, see
           @cancel="onCancel"
         />
       </v-stepper-content>
-
-      <v-stepper-step step="3"> Rooms </v-stepper-step>
-      <v-stepper-content step="3">
-        <AdvenceSettings
-          :model-name="basic.selectedModel"
-          :revit-cat="['Revit Pièces', 'Revit Rooms']"
-          @seeList="seeTestList"
-          @continue="onRoomSelect"
-          @cancel="onCancel"
-        >
-          <v-checkbox
-            v-model="isRoomRefOK"
-            :label="`Use Rooms 3D as Reference.`"
-          />
-          <template v-if="isRoomRefOK">
-            <v-text-field
-              v-model="floorRoomNbr"
-              label="Attribut name of the Room's number in the Level."
-            />
-            <v-text-field
-              v-model="floorRoomName"
-              label="Attribut name to rename the Room"
-              placeholder="Optional"
-            />
-            <v-text-field
-              v-model="floorLevelName"
-              label="Attribut name to rename the Level"
-              placeholder="Optional"
-            />
-          </template>
-        </AdvenceSettings>
-      </v-stepper-content>
-      <template v-if="!isRoomRefOK">
-        <v-stepper-step step="4">
-          Floors*
-          <small>Optional</small>
-        </v-stepper-step>
-        <v-stepper-content step="4">
+      <template v-if="basic.isRawData && !basic.isFloorOnlyImport">
+        <v-stepper-step step="3"> Rooms </v-stepper-step>
+        <v-stepper-content step="3">
           <AdvenceSettings
             :model-name="basic.selectedModel"
-            :revit-cat="['Revit Sols', 'Revit Floors']"
+            :revit-cat="['Revit Pièces', 'Revit Rooms']"
             @seeList="seeTestList"
-            @continue="onFloorSelect"
+            @continue="onRoomSelect"
             @cancel="onCancel"
           >
-            <v-text-field
-              v-model="floorRoomNbr"
-              label="Attribut name of the Room's number in the Level."
+            <v-checkbox
+              v-model="isRoomRefOK"
+              :label="`Use Rooms 3D as Reference.`"
             />
-            <v-text-field
-              v-model="floorRoomName"
-              label="Attribut name to rename the Room"
-              placeholder="Optional"
-            />
-            <v-text-field
-              v-model="floorLevelName"
-              label="Attribut name to rename the Level"
-              placeholder="Optional"
-            />
+            <template v-if="isRoomRefOK">
+              <v-text-field
+                v-model="floorRoomNbr"
+                label="Attribut name of the Room's number in the Level."
+              />
+              <v-text-field
+                v-model="floorRoomName"
+                label="Attribut name to rename the Room"
+                placeholder="Optional"
+              />
+              <v-text-field
+                v-model="floorLevelName"
+                label="Attribut name to rename the Level"
+                placeholder="Optional"
+              />
+            </template>
           </AdvenceSettings>
         </v-stepper-content>
+        <template v-if="!isRoomRefOK">
+          <v-stepper-step step="4">
+            Floors*
+            <small>Optional</small>
+          </v-stepper-step>
+          <v-stepper-content step="4">
+            <AdvenceSettings
+              :model-name="basic.selectedModel"
+              :revit-cat="['Revit Sols', 'Revit Floors']"
+              @seeList="seeTestList"
+              @continue="onFloorSelect"
+              @cancel="onCancel"
+            >
+              <v-text-field
+                v-model="floorRoomNbr"
+                label="Attribut name of the Room's number in the Level."
+              />
+              <v-text-field
+                v-model="floorRoomName"
+                label="Attribut name to rename the Room"
+                placeholder="Optional"
+              />
+              <v-text-field
+                v-model="floorLevelName"
+                label="Attribut name to rename the Level"
+                placeholder="Optional"
+              />
+            </AdvenceSettings>
+          </v-stepper-content>
+        </template>
       </template>
 
       <v-stepper-step :step="structureStep"> Structures </v-stepper-step>
@@ -206,7 +207,13 @@ export default {
     },
     onLevelSelect(value) {
       this.levelSelect = value;
-      this.e1 = this.e1 + 1;
+      if (this.basic.isRawData && !this.basic.isFloorOnlyImport) {
+        this.e1 = this.e1 + 1;
+      } else {
+        this.e1 = this.e1 + 2; // Skip room selection if raw data is not used
+        this.roomSelect = [];
+      }
+      // this.e1 = this.e1 + 1;
     },
     onRoomSelect(value) {
       this.roomSelect = value;

@@ -44,6 +44,9 @@ with this file. If not, see
         </md-select>
       </md-field>
       <md-checkbox v-model="isRawData">Mode Raw Data</md-checkbox>
+      <md-checkbox v-if="isRawData" v-model="isFloorOnlyImport"
+        >Import only reference objects to floors</md-checkbox
+      >
 
       <md-field v-if="isRawData">
         <label for="context select">Select a BIM Geo Context</label>
@@ -162,6 +165,7 @@ export default {
       buildingSelectedValue: null,
       buildings: [],
       isRawData: false,
+      isFloorOnlyImport: false,
       newContextValue: '',
       openDialogNewcontext: false,
       contextSelectedValue: null,
@@ -240,6 +244,7 @@ export default {
     onContinue() {
       this.$emit('continue', {
         isRawData: this.isRawData,
+        isFloorOnlyImport: this.isFloorOnlyImport,
         selectedModel: this.selectedModel,
         buildingServId: this.buildingSelectedValue,
         BIMGeocontextServId: this.contextSelectedValue,
