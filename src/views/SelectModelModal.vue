@@ -185,16 +185,13 @@ import {
   waitPathSendToHub,
   saveCmdsGenerateGeo,
   getContextSpatial,
-} from 'spinal-spatial-referential';
-import { getModelByName } from '../services/getObjFromRvtModel';
-import { FileSystem } from 'spinal-core-connectorjs';
-import {
   GEO_BUILDING_RELATION,
   GEO_FLOOR_RELATION,
   GEO_FLOOR_TYPE,
   GEO_SITE_RELATION,
-} from 'spinal-spatial-referential/declarations/Constant';
-import { set } from 'lodash';
+} from 'spinal-spatial-referential';
+import { getModelByName } from '../services/getObjFromRvtModel';
+import { FileSystem } from 'spinal-core-connectorjs';
 export default {
   name: 'DialogGenerateContext',
   components: { Basicselectmodel, AdvencedSelectModel, SpatialDiffSettings },
