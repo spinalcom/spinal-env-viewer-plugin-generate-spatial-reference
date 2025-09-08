@@ -115,6 +115,31 @@ with this file. If not, see
           >
         </md-dialog-actions>
       </md-dialog>
+
+      <md-dialog :md-active.sync="showDialogCenterPos">
+        <md-dialog-title>Choose which floors to update</md-dialog-title>
+        <md-dialog-content>
+          <md-field>
+            <md-select v-model="selectedFloorNames" multiple>
+              <md-option
+                v-for="floor in floorsNames"
+                :key="floor"
+                :value="floor"
+                >{{ floor }}</md-option
+              >
+            </md-select>
+          </md-field>
+        </md-dialog-content>
+        <md-dialog-actions>
+          <md-button class="md-primary" @click="showDialogCenterPos = false"
+            >Close</md-button
+          >
+          <md-button class="md-primary" @click="setCenterPosInContextGeo"
+            >confirm</md-button
+          >
+        </md-dialog-actions>
+      </md-dialog>
+
       <v-progress-linear
         v-if="spin"
         style="margin: 0"
@@ -150,7 +175,7 @@ import {
   loadBimFile,
   setLevelInContextGeo,
   setAreaInContextGeo,
-  setCenterPosInContextGeo,
+  setCenterPosInContextGeoByFloors,
   addNodeGraphService,
   getViewer,
   loadConfig,
@@ -159,9 +184,17 @@ import {
   createCmdFloorOnlyImport,
   waitPathSendToHub,
   saveCmdsGenerateGeo,
+  getContextSpatial,
 } from 'spinal-spatial-referential';
 import { getModelByName } from '../services/getObjFromRvtModel';
 import { FileSystem } from 'spinal-core-connectorjs';
+import {
+  GEO_BUILDING_RELATION,
+  GEO_FLOOR_RELATION,
+  GEO_FLOOR_TYPE,
+  GEO_SITE_RELATION,
+} from 'spinal-spatial-referential/declarations/Constant';
+import { set } from 'lodash';
 export default {
   name: 'DialogGenerateContext',
   components: { Basicselectmodel, AdvencedSelectModel, SpatialDiffSettings },
@@ -183,6 +216,9 @@ export default {
       showSnackbar: false,
       msgSnackbar: '',
       durationSnakebar: Infinity,
+      floorsNames: [],
+      selectedFloorNames: [],
+      showDialogCenterPos: false,
       scripts: [
         { divider: true, title: 'Script before update' },
         { title: 'Update bimobjects from externalIds', fct: this.updateDbIds },
@@ -201,7 +237,7 @@ export default {
         },
         {
           title: 'Set center postion attribute in context spatial',
-          fct: this.setCenterPosInContextGeo,
+          fct: this.openDialogCenterPosInContextGeo,
         },
       ],
       updateBimobjectsName: true,
@@ -272,9 +308,50 @@ export default {
       const graph = getGraph();
       return setAreaInContextGeo(graph);
     },
-    setCenterPosInContextGeo() {
+    async openDialogCenterPosInContextGeo() {
+      this.showDialogCenterPos = true;
+      this.floorsNames = [];
       const graph = getGraph();
-      return setCenterPosInContextGeo(graph, this.callbackScript);
+      const context = await getContextSpatial(graph);
+      const relationNames = [
+        GEO_SITE_RELATION,
+        GEO_BUILDING_RELATION,
+        GEO_FLOOR_RELATION,
+      ];
+      const floorNodes = await context.find(relationNames, (node) => {
+        return node.info.type.get() === GEO_FLOOR_TYPE;
+      });
+      for (const floorNode of floorNodes) {
+        this.floorsNames.push(floorNode.info.name.get());
+      }
+      this.selectedFloorNames = this.floorsNames.slice();
+    },
+    async setCenterPosInContextGeo() {
+      this.showDialogCenterPos = false;
+      if (this.selectedFloorNames.length === 0) return;
+      const graph = getGraph();
+      const context = await getContextSpatial(graph);
+      const relationNames = [
+        GEO_SITE_RELATION,
+        GEO_BUILDING_RELATION,
+        GEO_FLOOR_RELATION,
+      ];
+      const floorNodes = await context.find(relationNames, (node) => {
+        return this.selectedFloorNames.includes(node.info.name.get());
+      });
+      this.spin = true;
+      try {
+        await setCenterPosInContextGeoByFloors(
+          context,
+          floorNodes,
+          this.callbackScript
+        );
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.spin = false;
+        this.showDialogCenterPos = false;
+      }
     },
     callbackScript(msg) {
       if (!msg || msg === 'done') {
