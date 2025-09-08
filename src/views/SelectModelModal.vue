@@ -185,11 +185,13 @@ import {
   waitPathSendToHub,
   saveCmdsGenerateGeo,
   getContextSpatial,
-  GEO_BUILDING_RELATION,
-  GEO_FLOOR_RELATION,
-  GEO_FLOOR_TYPE,
-  GEO_SITE_RELATION,
 } from 'spinal-spatial-referential';
+import {
+  BUILDING_RELATION as GEO_BUILDING_RELATION,
+  FLOOR_RELATION as GEO_FLOOR_RELATION,
+  FLOOR_TYPE as GEO_FLOOR_TYPE,
+  SITE_RELATION as GEO_SITE_RELATION,
+} from 'spinal-env-viewer-context-geographic-service';
 import { getModelByName } from '../services/getObjFromRvtModel';
 import { FileSystem } from 'spinal-core-connectorjs';
 export default {
@@ -315,6 +317,7 @@ export default {
         GEO_BUILDING_RELATION,
         GEO_FLOOR_RELATION,
       ];
+      console.log('relationNames', relationNames);
       const floorNodes = await context.find(relationNames, (node) => {
         return node.info.type.get() === GEO_FLOOR_TYPE;
       });
