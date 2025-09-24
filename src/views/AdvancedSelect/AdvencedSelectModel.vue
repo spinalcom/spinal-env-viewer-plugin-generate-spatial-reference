@@ -194,7 +194,11 @@ export default {
   },
   computed: {
     structureStep() {
-      return this.isRoomRefOK ? 4 : 5;
+      if (!this.basic.isFloorOnlyImport) {
+        return this.isRoomRefOK ? 4 : 5;
+      } else {
+        return 3;
+      }
     },
   },
   methods: {
@@ -207,13 +211,10 @@ export default {
     },
     onLevelSelect(value) {
       this.levelSelect = value;
-      if (!this.basic.isFloorOnlyImport) {
-        this.e1 = this.e1 + 1;
-      } else {
-        this.e1 = this.e1 + 2; // Skip room selection if raw data is not used
+      if (this.basic.isFloorOnlyImport) {
         this.roomSelect = [];
       }
-      // this.e1 = this.e1 + 1;
+      this.e1 = this.e1 + 1;
     },
     onRoomSelect(value) {
       this.roomSelect = value;
