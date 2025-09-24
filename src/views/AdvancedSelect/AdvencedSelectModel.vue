@@ -49,7 +49,7 @@ with this file. If not, see
           @cancel="onCancel"
         />
       </v-stepper-content>
-      <template v-if="basic.isRawData && !basic.isFloorOnlyImport">
+      <template v-if="!basic.isFloorOnlyImport">
         <v-stepper-step step="3"> Rooms </v-stepper-step>
         <v-stepper-content step="3">
           <AdvenceSettings
@@ -207,7 +207,7 @@ export default {
     },
     onLevelSelect(value) {
       this.levelSelect = value;
-      if (this.basic.isRawData && !this.basic.isFloorOnlyImport) {
+      if (!this.basic.isFloorOnlyImport) {
         this.e1 = this.e1 + 1;
       } else {
         this.e1 = this.e1 + 2; // Skip room selection if raw data is not used
