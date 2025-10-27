@@ -32,6 +32,16 @@ with this file. If not, see
       >
         <v-icon>image_search</v-icon>
       </v-btn>
+      <v-btn
+        v-tooltip="'isolate all the floor of the level selected'"
+        icon
+        :disabled="
+          selectedSpatial.length === 0 || selectedSpatial[0].type !== 'floor'
+        "
+        @click="isolateFloor"
+      >
+        <v-icon>settings_overscan</v-icon>
+      </v-btn>
       <v-spacer></v-spacer>
       <v-btn icon @click="generate">
         <v-icon>check</v-icon>
@@ -80,11 +90,15 @@ with this file. If not, see
 </template>
 
 <script>
-import {
+import ssRefService, {
   getSpatialTree,
   getRoomNodeFromSelectFloor,
+  GEO_REFERENCE_ROOM_RELATION,
+  getGraph,
+  getContextSpatial,
 } from 'spinal-spatial-referential';
 import AssingDataView from './AssingDataView.vue';
+import { utilities } from 'spinal-env-viewer-plugin-standard_button/js/utilities';
 
 export default {
   name: 'AssingView',
@@ -122,6 +136,27 @@ export default {
     async generate() {
       this.$refs.assingDataView.generate();
     },
+    async isolateFloor() {
+      const graph = getGraph();
+      const spatialContext = await getContextSpatial(graph);
+      const floorNode = FileSystem._objects[this.selectedSpatial[0].server_id];
+      const rooms = await floorNode.getChildrenInContext(spatialContext);
+      const floorRoomRefs = await Promise.all(
+        rooms.map((room) =>
+          room.getChildren(ssRefService.constants.GEO_REFERENCE_ROOM_RELATION)
+        )
+      );
+      const nodes = floorRoomRefs.flat();
+      const lstByModel = await utilities.sortBIMObjectByModel(nodes);
+      const arrRes = utilities.organizeBimObjectForAggregateViewer(
+        lstByModel,
+        'ids'
+      );
+      window.spinal.ForgeViewer.viewer.impl.visibilityManager.aggregateIsolate(
+        arrRes
+      );
+    },
+
     async opened({ contextId, selectedNodeId }) {
       this.contextId = contextId;
       this.selectedNodeId = selectedNodeId;
