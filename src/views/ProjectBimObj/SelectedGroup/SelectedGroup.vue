@@ -223,9 +223,9 @@ export default {
       this.$emit('savableCfg');
       return addSelectionToList(this.list, getViewer());
     },
-    addAGroup(groupeName) {
+    addAGroup({ groupName, stopAtLeaf }) {
       this.$emit('savableCfg');
-      addToProjectionGroup(this.list, groupeName);
+      addToProjectionGroup(this.list, groupName, stopAtLeaf);
     },
     isProjectionGroup: isProjectionGroup,
     addViewerSelection(idx) {

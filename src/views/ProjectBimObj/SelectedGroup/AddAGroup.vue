@@ -43,6 +43,11 @@ with this file. If not, see
           label="Group name"
           required
         ></v-text-field>
+        <v-checkbox
+          v-if="radioSelection === 'group'"
+          v-model="stopAtLeaf"
+          label="Stop at leaf nodes"
+        ></v-checkbox>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -69,6 +74,7 @@ export default {
       groupName: '',
       show: false,
       radioSelection: '3d',
+      stopAtLeaf: false,
     };
   },
   computed: {
@@ -90,7 +96,10 @@ export default {
       if (this.radioSelection === '3d') {
         this.$emit('addSelection');
       } else {
-        this.$emit('addAGroup', this.groupName);
+        this.$emit('addAGroup', {
+          groupName: this.groupName,
+          stopAtLeaf: this.stopAtLeaf,
+        });
       }
       this.show = false;
     },
