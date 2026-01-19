@@ -44,9 +44,12 @@ with this file. If not, see
           required
         ></v-text-field>
         <v-checkbox
-          v-if="radioSelection === 'group'"
           v-model="stopAtLeaf"
           label="Stop at leaf nodes"
+        ></v-checkbox>
+        <v-checkbox
+          v-model="aproximateByLevel"
+          label="Aproximate by level"
         ></v-checkbox>
       </v-card-text>
       <v-card-actions>
@@ -75,6 +78,7 @@ export default {
       show: false,
       radioSelection: '3d',
       stopAtLeaf: false,
+      aproximateByLevel: false,
     };
   },
   computed: {
@@ -94,11 +98,15 @@ export default {
     },
     onConfirm() {
       if (this.radioSelection === '3d') {
-        this.$emit('addSelection');
+        this.$emit('addSelection', {
+          stopAtLeaf: this.stopAtLeaf,
+          aproximateByLevel: this.aproximateByLevel,
+        });
       } else {
         this.$emit('addAGroup', {
           groupName: this.groupName,
           stopAtLeaf: this.stopAtLeaf,
+          aproximateByLevel: this.aproximateByLevel,
         });
       }
       this.show = false;

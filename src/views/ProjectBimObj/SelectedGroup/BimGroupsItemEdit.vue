@@ -52,6 +52,14 @@ with this file. If not, see
         <v-card-text>
           <div class="bim-groups-edit-name">
             <v-text-field v-model="name" label="Name"></v-text-field>
+            <v-checkbox
+              v-model="stopAtLeaf"
+              label="Stop at leaf nodes"
+            ></v-checkbox>
+            <v-checkbox
+              v-model="aproximateByLevel"
+              label="Aproximate by level"
+            ></v-checkbox>
           </div>
           <v-expansion-panel class="bim-groups-edit-content">
             <v-expansion-panel-content>
@@ -108,6 +116,8 @@ export default {
       offset: { r: 0, t: 0, z: 0 },
       uid: 0,
       previewMode: 0,
+      stopAtLeaf: false,
+      aproximateByLevel: false,
     };
   },
   conputed: {
@@ -127,6 +137,8 @@ export default {
         this.offset.z = this.itemToEdit.offset.z;
         this.uid = this.itemToEdit.uid;
         this.previewMode = 0;
+        this.stopAtLeaf = this.itemToEdit.stopAtLeaf || false;
+        this.aproximateByLevel = this.itemToEdit.aproximateByLevel || false;
       }
     },
   },
@@ -161,6 +173,8 @@ export default {
         name: this.name,
         offset: this.offset,
         uid: this.uid,
+        stopAtLeaf: this.stopAtLeaf,
+        aproximateByLevel: this.aproximateByLevel,
       });
     },
   },

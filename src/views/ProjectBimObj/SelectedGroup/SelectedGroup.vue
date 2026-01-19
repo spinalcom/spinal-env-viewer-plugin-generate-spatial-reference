@@ -55,9 +55,9 @@ with this file. If not, see
         <v-icon>check</v-icon>
       </v-btn>
     </v-toolbar>
-    <div class="geolocate-selected-groupe-main">
+    <div class="geolocate-selected-groupe-main spinal-scrollbar">
       <md-card class="geolocate-groupe-card">
-        <div class="geolocate-groupe-card-content spinal-scrollbar">
+        <div class="geolocate-groupe-card-content">
           <v-list class="spinal-project-item-main-list">
             <v-list-tile v-if="list.length === 0">
               <v-list-tile-content>
@@ -163,6 +163,11 @@ with this file. If not, see
         </div>
       </md-card>
     </div>
+    <v-progress-linear
+      class="spinal-project-item-group-progressbar"
+      v-if="progress != 100"
+      :value="progress"
+    ></v-progress-linear>
     <BimGroupsItemEdit
       :item-to-edit="itemToEdit"
       @close="onCloseEdit"
@@ -184,7 +189,7 @@ import {
 } from 'spinal-spatial-referential';
 export default {
   name: 'SelectedGroup',
-  props: ['name', 'uid', 'list', 'canSave'],
+  props: ['name', 'uid', 'list', 'canSave', 'progress'],
   components: {
     AddAGroup,
     BimGroupsListHeaderBouttons,
@@ -219,13 +224,18 @@ export default {
     generate() {
       this.$emit('generate', [this.uid]);
     },
-    addSelection() {
+    addSelection({ stopAtLeaf, aproximateByLevel }) {
       this.$emit('savableCfg');
-      return addSelectionToList(this.list, getViewer());
+      return addSelectionToList(
+        this.list,
+        stopAtLeaf,
+        aproximateByLevel,
+        getViewer()
+      );
     },
-    addAGroup({ groupName, stopAtLeaf }) {
+    addAGroup({ groupName, stopAtLeaf, aproximateByLevel }) {
       this.$emit('savableCfg');
-      addToProjectionGroup(this.list, groupName, stopAtLeaf);
+      addToProjectionGroup(this.list, groupName, stopAtLeaf, aproximateByLevel);
     },
     isProjectionGroup: isProjectionGroup,
     addViewerSelection(idx) {
@@ -265,6 +275,8 @@ export default {
             item.offset.r = editItem.offset.r;
             item.offset.t = editItem.offset.t;
             item.offset.z = editItem.offset.z;
+            item.stopAtLeaf = editItem.stopAtLeaf;
+            item.aproximateByLevel = editItem.aproximateByLevel;
             this.$emit('savableCfg');
             break;
           }
@@ -316,6 +328,14 @@ export default {
   padding: 0;
   height: 24px;
   min-width: unset;
+}
+.spinal-project-item-group-progressbar {
+  width: 100%;
+  position: absolute;
+  bottom: 7px;
+  left: 0;
+  margin: 0;
+  z-index: 1;
 }
 </style>
 
