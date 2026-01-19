@@ -246,6 +246,8 @@ export default {
           this.progress = 100;
           return;
         }
+        this.progress = 100;
+        this.generate_intersects();
       } catch (error) {
         console.error(error);
         this.progress = 100;
