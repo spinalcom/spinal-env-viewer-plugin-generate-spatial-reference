@@ -84,61 +84,93 @@ with this file. If not, see
         :isFloorOnlyImport="isFloorOnlyImport"
         :BIMGeocontextServId="BIMGeocontextServId"
       ></SpatialDiffSettings>
-      <md-dialog :md-active.sync="showDialog">
-        <md-dialog-title>Choose which bimFile to update</md-dialog-title>
-        <md-dialog-content>
-          <md-field>
-            <md-select v-model="selectedModelModal" multiple>
-              <md-option
-                v-for="bimFileName in bimfiles"
-                :key="bimFileName"
-                :value="bimFileName"
-                >{{ bimFileName }}</md-option
-              >
-            </md-select>
-          </md-field>
-          <v-checkbox
-            v-model="updateBimobjectsName"
-            label="update bimobjects name"
-          ></v-checkbox>
-          <v-checkbox
-            v-model="updateBimobjectsDbid"
-            label="update bimobjects dbid"
-          ></v-checkbox>
-        </md-dialog-content>
-        <md-dialog-actions>
-          <md-button class="md-primary" @click="showDialog = false"
-            >Close</md-button
+      <v-dialog v-model="showDialog" fill-width>
+        <v-card>
+          <v-card-title class="headline"
+            >Update bimobjects from externalIds</v-card-title
           >
-          <md-button class="md-primary" @click="updateDbIdsConfirm"
-            >confirm</md-button
-          >
-        </md-dialog-actions>
-      </md-dialog>
+          <v-card-text>
+            <v-select
+              :items="bimfiles"
+              label="Choose which bimFile to update"
+              v-model="selectedModelModal"
+              multiple
+            >
+              <template #item="{ item, tile }">
+                <v-checkbox
+                  v-tooltip="item"
+                  :value="tile.props.value"
+                  :label="item"
+                />
+              </template>
+            </v-select>
+            <v-checkbox
+              v-model="updateBimobjectsName"
+              label="update bimobjects name"
+            ></v-checkbox>
+            <v-checkbox
+              v-model="updateBimobjectsDbid"
+              label="update bimobjects dbid"
+            ></v-checkbox>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="red darken-1" flat="flat" @click="showDialog = false">
+              Close
+            </v-btn>
 
-      <md-dialog :md-active.sync="showDialogCenterPos">
-        <md-dialog-title>Choose which floors to update</md-dialog-title>
-        <md-dialog-content>
-          <md-field>
-            <md-select v-model="selectedFloorNames" multiple>
-              <md-option
-                v-for="floor in floorsNames"
-                :key="floor"
-                :value="floor"
-                >{{ floor }}</md-option
-              >
-            </md-select>
-          </md-field>
-        </md-dialog-content>
-        <md-dialog-actions>
-          <md-button class="md-primary" @click="showDialogCenterPos = false"
-            >Close</md-button
+            <v-btn
+              color="green darken-1"
+              flat="flat"
+              @click="updateDbIdsConfirm"
+            >
+              Confirm
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="showDialogCenterPos" fill-width>
+        <v-card>
+          <v-card-title class="headline"
+            >Set center postion attribute in context spatial</v-card-title
           >
-          <md-button class="md-primary" @click="setCenterPosInContextGeo"
-            >confirm</md-button
-          >
-        </md-dialog-actions>
-      </md-dialog>
+          <v-card-text>
+            <v-select
+              :items="floorsNames"
+              label="Choose which floors to update"
+              v-model="selectedFloorNames"
+              multiple
+            >
+              <template #item="{ item, tile }">
+                <v-checkbox
+                  v-tooltip="item"
+                  :value="tile.props.value"
+                  :label="item"
+                />
+              </template>
+            </v-select>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="red darken-1"
+              flat="flat"
+              @click="showDialogCenterPos = false"
+            >
+              Close
+            </v-btn>
+
+            <v-btn
+              color="green darken-1"
+              flat="flat"
+              @click="setCenterPosInContextGeo"
+            >
+              Confirm
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
       <v-progress-linear
         v-if="spin"
@@ -210,7 +242,7 @@ export default {
       isFloorOnlyImport: false,
       BIMGeocontextServId: NaN,
       selectedModel: null,
-      selectedModelModal: null,
+      selectedModelModal: [],
       showDialog: false,
       showSnackbar: false,
       msgSnackbar: '',
@@ -317,7 +349,6 @@ export default {
         GEO_BUILDING_RELATION,
         GEO_FLOOR_RELATION,
       ];
-      console.log('relationNames', relationNames);
       const floorNodes = await context.find(relationNames, (node) => {
         return node.info.type.get() === GEO_FLOOR_TYPE;
       });

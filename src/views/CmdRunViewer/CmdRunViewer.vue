@@ -106,11 +106,16 @@ const CmdRunViewer = {
         try {
           this.loading = true;
           if (this.mode === GENERATION_GEO_TYPE) {
-            await this.$refs.CmdRunViewerGeo.setUp(node, option.contextId);
+            await this.$refs.CmdRunViewerGeo.setUp(
+              node,
+              option.contextId,
+              option.dataCmd
+            );
           } else if (this.mode === GENERATION_PROJECTION_TYPE) {
             await this.$refs.CmdRunViewerProjection.setUp(
               node,
-              option.contextId
+              option.contextId,
+              option.dataCmd
             );
           }
         } catch (error) {

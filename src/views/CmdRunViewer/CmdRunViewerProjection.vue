@@ -51,11 +51,15 @@ export default {
     };
   },
   methods: {
-    async setUp(node, contextId) {
+    async setUp(node, contextId, dataCmd = null) {
       this.$emit('status', 0);
       this.progress = 0;
       this.nodeId = node.info.id.get();
       this.contextId = contextId;
+      if (dataCmd) {
+        this.dataCmd = dataCmd;
+        return;
+      }
       const servId = getCmdServId(node);
       const getData = await Axios.get(`/sceen/_?u=${servId}`, {
         responseType: 'blob',

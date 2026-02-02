@@ -38,6 +38,7 @@ with this file. If not, see
             v-for="(bimfile, idx) in bimfiles"
             :key="idx"
             :value="bimfile"
+            v-tooltip="bimfile"
           >
             {{ bimfile }}
           </md-option>
